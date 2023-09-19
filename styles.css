@@ -1,0 +1,99 @@
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #ECECEB;
+
+}
+
+.grid-item {
+    display: flex;
+    flex-direction: column;
+    background-color: #FFFFFE;
+    border: 1px solid #666;
+    padding: 1em;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: auto repeat(3, 1fr) auto;
+    margin: 1em;
+    height: 92svh;
+    grid-template-areas:
+        "header header header header header header header header header header"
+        "kp kp ka ka vp vp bs bs be be"
+        "kp kp kr kr vp vp de de be be"
+        "mb mb mb mb mb if if if if if"
+        "footer footer footer footer footer footer footer footer footer footer";
+}
+
+header {
+    grid-area: header;
+    font-size: 2em;
+    font-weight: bold;
+}
+
+footer {
+    grid-area: footer;
+}
+
+footer span {
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+#kp {
+    grid-area: kp;
+}
+
+#ka {
+    grid-area: ka;
+}
+
+#vp {
+    grid-area: vp;
+}
+
+#bs {
+    grid-area: bs;
+}
+
+#be {
+    grid-area: be;
+}
+
+#kr {
+    grid-area: kr;
+}
+
+#de {
+    grid-area: de;
+}
+
+#mb {
+    grid-area: mb;
+}
+
+#if {
+    grid-area: if;
+}
+
+.e {
+    width: 100%;
+    height: 100%;
+    outline: none;
+}
+h2 {
+    padding-bottom: 0.5em;
+}
+
+.hi {
+    box-shadow: inset 0 0.25em 0.5em #F7F;
+}
