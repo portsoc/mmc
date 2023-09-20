@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 59.1 (86144) - https://sketch.com -->
+    <title>Group@1x</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Acr173651137319424-2370987" stroke="#000000" stroke-width="1.25">
+            <g id="Group" transform="translate(1.000000, 1.000000)">
+                <path d="M29.9416,29.7395809 C29.9416,26.2395809 27.1046,23.4025809 23.6046,23.4025809 C20.1046,23.4025809 17.2676,26.2395809 17.2676,29.7395809 L29.9416,29.7395809 Z" id="Stroke-1" stroke-linecap="square"></path>
+                <path d="M27.4772,16.7240809 C27.4772,18.8630809 25.7432,20.5970809 23.6042,20.5970809 C21.4662,20.5970809 19.7322,18.8630809 19.7322,16.7240809 C19.7322,14.5850809 21.4662,12.8510809 23.6042,12.8510809 C25.7432,12.8510809 27.4772,14.5850809 27.4772,16.7240809 Z" id="Stroke-3" stroke-linecap="round" stroke-linejoin="round"></path>
+                <polyline id="Stroke-5" stroke-linecap="square" points="15.626 20.2582809 9.877 20.2582809 9.877 16.5702809 2.84217094e-14 16.5702809 2.84217094e-14 29.7392809 17.268 29.7392809"></polyline>
+                <polygon id="Stroke-7" stroke-linecap="square" points="7.9015 16.5703809 1.9755 16.5703809 3.0625 6.18938093 7.0135 6.18938093"></polygon>
+                <line x1="3.261" y1="10.4170809" x2="7.286" y2="10.4170809" id="Stroke-9" stroke-linecap="square"></line>
+                <path d="M5.2732,3.15198093 C11.3802,-4.99101907 17.4872,5.86598093 23.5942,0.437980933 C16.1302,10.6159809 10.7022,-0.241019067 5.2732,3.15198093 Z" id="Stroke-11" stroke-linecap="square" stroke-linejoin="bevel"></path>
+                <line x1="3.9525" y1="25.2006809" x2="6.0045" y2="25.2006809" id="Stroke-13" stroke-linecap="square"></line>
+                <line x1="10.1086" y1="25.2006809" x2="12.1606" y2="25.2006809" id="Stroke-15" stroke-linecap="square"></line>
+                <line x1="3.9525" y1="21.1092809" x2="6.0045" y2="21.1092809" id="Stroke-17" stroke-linecap="square"></line>
+            </g>
+        </g>
+    </g>
+</svg>
