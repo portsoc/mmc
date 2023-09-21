@@ -1,3 +1,34 @@
+:root {
+    --grid-template-areas:
+    "header header header header header header header header header header"
+    "kp kp ka ka vp vp bs bs be be"
+    "kp kp kr kr vp vp de de be be"
+    "mb mb mb mb mb if if if if if"
+    "footer footer footer footer footer footer footer footer footer footer";
+    --grid-template-columns: repeat(10, 1fr);
+    --grid-template-rows: auto repeat(3, 1fr) auto;
+}
+
+@media (width < 40em) {
+    :root {
+        --grid-template-areas:
+        "header"
+        "be"
+        "bs" 
+        "de" 
+        "vp" 
+        "kp"
+        "ka" 
+        "kr" 
+        "mb" 
+        "if"
+        "footer";
+        
+        --grid-template-columns: 1fr;
+        --grid-template-rows: repeat(14, 1fr);
+        }
+}
+
 * {
     box-sizing: border-box;
     padding: 0;
@@ -22,17 +53,12 @@ body {
 
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    grid-template-rows: auto repeat(3, 1fr) auto;
     margin: 1em;
     height: 92svh;
-    grid-template-areas:
-        "header header header header header header header header header header"
-        "kp kp ka ka vp vp bs bs be be"
-        "kp kp kr kr vp vp de de be be"
-        "mb mb mb mb mb if if if if if"
-        "footer footer footer footer footer footer footer footer footer footer";
-}
+    grid-template-areas: var(--grid-template-areas);
+    grid-template-columns: var(--grid-template-columns);
+    grid-template-rows: var(--grid-template-rows);
+  }
 
 header {
     grid-area: header;
