@@ -1,11 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="17px" height="35px" viewBox="0 0 17 35" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 59.1 (86144) - https://sketch.com -->
-    <title>Stroke 1@1x</title>
-    <desc>Created with Sketch.</desc>
-    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="square">
-        <g id="Acr173651137319424825277" stroke="#000000" stroke-width="1.25">
-            <polygon id="Stroke-1" points="2.32 31.36 6.26 16.847 1 16.847 4.96 1 15.52 1 8.927 11.56 15.527 11.56"></polygon>
-        </g>
-    </g>
+<svg width="34px" height="34px" viewBox="0 0 17 35" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <polygon stroke="#000000" stroke-width="1.25" fill="none" points="2.32 31.36 6.26 16.84 1 16.84 4.96 1 15.52 1 8.92 11.56 15.52 11.56"></polygon>
 </svg>

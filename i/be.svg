@@ -1,19 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="34px" height="32px" viewBox="0 0 34 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 59.1 (86144) - https://sketch.com -->
-    <title>Group@1x</title>
-    <desc>Created with Sketch.</desc>
-    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Acr173651137319424-1305585">
-            <g id="Group" transform="translate(1.000000, 1.000000)">
-                <g id="Group-4" transform="translate(10.004200, 10.329400)">
-                    <path d="M1.241,1.0019 C0.809,1.0059 0.461,1.3599 0.465,1.7919 C0.465,1.7949 0.465,1.7969 0.465,1.7999 C0.484,2.2349 0.841,2.5789 1.277,2.5829 C1.713,2.5749 2.061,2.2149 2.053,1.7779 L2.053,1.7779 C2.038,1.3519 1.696,1.0099 1.27,0.9949" id="Fill-1" fill="#000000"></path>
-                    <path d="M1.241,1.0019 C0.809,1.0059 0.461,1.3599 0.465,1.7919 C0.465,1.7949 0.465,1.7969 0.465,1.7999 C0.484,2.2349 0.841,2.5789 1.277,2.5829 C1.713,2.5749 2.061,2.2149 2.053,1.7779 L2.053,1.7779 C2.038,1.3519 1.696,1.0099 1.27,0.9949" id="Stroke-3" stroke="#000000" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"></path>
-                </g>
-                <polyline id="Stroke-5" stroke="#000000" stroke-width="1.25" points="11.1877 21.3401 3.9807 21.3401 3.9807 18.3081"></polyline>
-                <line x1="7.0993" y1="25.4213" x2="11.1873" y2="21.3403" id="Stroke-7" stroke="#000000" stroke-width="1.25" stroke-linecap="round"></line>
-                <path d="M3.981,18.308 L1.674,18.308 C0.75,18.308 -1.13686838e-13,17.559 -1.13686838e-13,16.634 C-1.13686838e-13,16.388 0.054,16.145 0.158,15.923 L4.872,7.106 C7.689,1.998 12.546,0 17.309,0 C25.48,-0.001 32.104,6.622 32.106,14.792 C32.107,22.963 25.484,29.588 17.313,29.589 C13.492,29.589 9.819,28.111 7.063,25.464" id="Stroke-9" stroke="#000000" stroke-width="1.25" stroke-linecap="square"></path>
-            </g>
-        </g>
-    </g>
+<svg width="34px" height="34px" viewBox="-1 0 34 31" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" stroke-width="1.25" stroke="#000000" fill="none">
+    <path id="head" d="M3.98,18.30 L1.67,18.30 C0.75,18.30 -1.138e-13,17.55 -1.138e-13,16.63 C-1.138e-13,16.38 0.05,16.14 0.15,15.92 L4.87,7.10 C7.68,1.99 12.54,0 17.30,0 C25.48,-0 32.10,6.62 32.10,14.79 C32.10,22.96 25.48,29.58 17.31,29.58 C13.49,29.58 9.81,28.11 7.06,25.464" stroke-linecap="square"></path>
+    <path id="eye" transform="translate(10, 10.32)" d="M1.24,1 C0.80,1 0.46,1.35 0.46,1.79 C0.46,1.79 0.46,1.79 0.46,1.79 C0.48,2.23 0.84,2.57 1.27,2.58 C1.71,2.57 2.06,2.21 2.05,1.77 L2.05,1.77 C2.03,1.35 1.69,1 1.27,0.99" fill="#000000"></path>
+    <polyline id="upperlip" points="11.18 21.34 3.98 21.34 3.98 18.30"></polyline>
+    <line id="lowerlip" x1="7.09" y1="25.42" x2="11.18" y2="21.34" stroke-linecap="round"></line>
 </svg>

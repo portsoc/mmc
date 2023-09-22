@@ -1,17 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="31px" height="34px" viewBox="0 0 31 34" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 59.1 (86144) - https://sketch.com -->
-    <title>Group@1x</title>
-    <desc>Created with Sketch.</desc>
-    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Acr1736511373194249935101" stroke="#000000" stroke-width="1.25">
-            <g id="Group" transform="translate(1.000000, 1.000000)">
-                <line x1="14.6430703" y1="30.4600982" x2="14.6430703" y2="8.50109818" id="Stroke-1" stroke-linecap="square"></line>
-                <path d="M21.5820352,5.05097958 C19.5370352,6.65297958 17.1910352,7.82697958 14.6820352,8.50097958 C15.3550352,5.99197958 16.5280352,3.64497958 18.1320352,1.60097958 C20.2770352,-0.544020423 21.4920352,-0.212020423 22.4510352,0.736979577 C23.4100352,1.68597958 23.7270352,2.90597958 21.5820352,5.05097958 Z" id="Stroke-3"></path>
-                <path d="M7.7039223,5.05097958 C9.7489223,6.65297958 12.0949223,7.82697958 14.6039223,8.50097958 C13.9309223,5.99197958 12.7579223,3.64497958 11.1539223,1.60097958 C9.0089223,-0.544020423 7.7939223,-0.212020423 6.8349223,0.736979577 C5.8769223,1.68597958 5.5589223,2.90597958 7.7039223,5.05097958 Z" id="Stroke-5" stroke-linecap="square"></path>
-                <polygon id="Stroke-7" stroke-linecap="square" points="2.44 31.4632053 26.839 31.4632053 26.839 16.8242053 2.44 16.8242053"></polygon>
-                <polygon id="Stroke-9" stroke-linecap="square" points="0 16.8242053 29.279 16.8242053 29.279 9.50420528 0 9.50420528"></polygon>
-            </g>
-        </g>
-    </g>
+<svg width="34px" height="34px" viewBox="-1 -1 31 34" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" stroke="#000000" stroke-width="1.25">
+    <line x1="14.64" y1="30.46" x2="14.64" y2="8.508"></line>
+    <path d="M21.58,5.05 C19.53,6.65 17.19,7.82 14.68,8.50 C15.35,5.99 16.52,3.64 18.13,1.60 C20.27,-0.54 21.49,-0.21 22.45,0.73 C23.41,1.68 23.72,2.90 21.58,5.05 Z"></path>
+    <path d="M7.70,5.05 C9.74,6.65 12.09,7.82 14.60,8.50 C13.93,5.99 12.75,3.64 11.15,1.60 C9.00,-0.54 7.79,-0.21 6.83,0.73 C5.87,1.68 5.55,2.90 7.70,5.05 Z"></path>
+    <polygon points="2.44 31.46 26.83 31.46 26.83 16.82 2.44 16.82"></polygon>
+    <polygon points="0 16.82 29.27 16.82 29.27 9.50 0 9.508"></polygon>
 </svg>

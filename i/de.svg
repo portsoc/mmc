@@ -1,19 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="39px" height="30px" viewBox="0 0 39 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 59.1 (86144) - https://sketch.com -->
-    <title>Group@1x</title>
-    <desc>Created with Sketch.</desc>
-    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Acr173651137319424835489" stroke="#000000" stroke-width="1.25">
-            <g id="Group" transform="translate(1.000000, 1.000000)">
-                <path d="M12.1743,19.4785 C14.4153,19.4785 16.2323,21.2955 16.2323,23.5365 C16.2323,25.7775 14.4153,27.5945 12.1743,27.5945 C9.9333,27.5945 8.1163,25.7775 8.1163,23.5365 C8.1163,21.2955 9.9333,19.4785 12.1743,19.4785 Z" id="Stroke-1" stroke-linecap="round" stroke-linejoin="round"></path>
-                <path d="M30.03,19.4785 C32.271,19.4785 34.088,21.2955 34.088,23.5365 C34.088,25.7775 32.271,27.5945 30.03,27.5945 C27.789,27.5945 25.972,25.7775 25.972,23.5365 C25.972,21.2955 27.789,19.4785 30.03,19.4785 Z" id="Stroke-3" stroke-linecap="round" stroke-linejoin="round"></path>
-                <polyline id="Stroke-5" stroke-linecap="square" points="12.9859 16.232 12.9859 -2.84217094e-14 37.3349 -2.84217094e-14 37.3349 22.725 34.0879 22.725"></polyline>
-                <line x1="16.2324" y1="22.725" x2="25.9714" y2="22.725" id="Stroke-7" stroke-linecap="square"></line>
-                <path d="M7.2855,24.3482 L0.0005,24.3482 L0.0005,12.9852 C4.7385,5.9862 2.9075,6.4922 6.4925,6.4922 L12.9855,6.4922" id="Stroke-9" stroke-linecap="square"></path>
-                <line x1="0" y1="21.1018" x2="8.116" y2="21.1018" id="Stroke-11" stroke-linecap="square"></line>
-                <path d="M0,13.7972 L6.493,13.7972 C7.389,13.7972 8.116,13.0702 8.116,12.1742 L8.116,6.4922" id="Stroke-13" stroke-linecap="square"></path>
-            </g>
-        </g>
-    </g>
+<svg width="34px" height="34px" viewBox="-1 0 39 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" stroke="#000000" stroke-width="1.25">
+    <path id="wheel1" d="M12.17,19.47 C14.41,19.47 16.23,21.29 16.23,23.53 C16.23,25.77 14.41,27.59 12.17,27.59 C9.93,27.59 8.11,25.77 8.11,23.53 C8.11,21.29 9.93,19.47 12.17,19.47 Z" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path id="wheel2" d="M30.03,19.47 C32.27,19.47 34.08,21.29 34.08,23.53 C34.08,25.77 32.27,27.59 30.03,27.59 C27.78,27.59 25.97,25.77 25.97,23.53 C25.97,21.29 27.78,19.47 30.03,19.47 Z" stroke-linecap="round" stroke-linejoin="round"></path>
+    <polyline id="box" stroke-linecap="square" points="12.98 16.23 12.98 -2.844e-14 37.33 -2.844e-14 37.33 22.72 34.08 22.725"></polyline>
+    <line id="safetybar" x1="16.23" y1="22.725" x2="25.97" y2="22.725" stroke-linecap="square"></line>
+    <path id="cab" d="M7.28,24.34 L0,24.34 L0,12.98 C4.73,5.98 2.90,6.49 6.49,6.49 L12.98,6.49" stroke-linecap="square"></path>
+    <path id="glass" d="M0,13.79 L6.49,13.79 C7.38,13.79 8.11,13.07 8.11,12.17 L8.11,6.49" stroke-linecap="square"></path>
+    <line id="fender" x1="0" y1="21.10" x2="8.116" y2="21.10" stroke-linecap="square"></line>
 </svg>

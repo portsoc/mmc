@@ -1,18 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="34px" height="35px" viewBox="0 0 34 35" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 59.1 (86144) - https://sketch.com -->
-    <title>Group@1x</title>
-    <desc>Created with Sketch.</desc>
-    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Acr1736511373194241467691" stroke="#000000" stroke-width="1.25">
-            <g id="Group" transform="translate(1.000000, 1.000000)">
-                <path d="M7.0844,9.9123 C7.0844,11.4753 8.3514,12.7413 9.9134,12.7413 C11.4764,12.7413 12.7434,11.4753 12.7434,9.9123 C12.7434,8.3493 11.4764,7.0833 9.9134,7.0833 C8.3514,7.0833 7.0844,8.3493 7.0844,9.9123 Z" id="Stroke-1" stroke-linecap="round" stroke-linejoin="round"></path>
-                <line x1="5.68434189e-14" y1="-2.84217094e-14" x2="9.195" y2="9.195" id="Stroke-3" stroke-linecap="square"></line>
-                <polyline id="Stroke-5" stroke-linecap="square" points="2.8505 3.6734 3.0015 14.5854 20.7425 32.3274 32.1685 20.9014 14.4585 3.1904 3.4885 2.8424"></polyline>
-                <line x1="16.9518" y1="16.9649" x2="15.7298" y2="15.7429" id="Stroke-7" stroke-linecap="square"></line>
-                <path d="M18.988,14.9287 L16.007,17.9097 C15.404,18.5127 15.404,19.4897 16.007,20.0927 C16.449,20.5417 17.123,20.6717 17.701,20.4187 L21.081,18.3907 C21.861,18.0447 22.772,18.3967 23.118,19.1757 C23.379,19.7667 23.246,20.4567 22.783,20.9067 L19.802,23.8877" id="Stroke-9" stroke-linecap="square"></path>
-                <line x1="23.0604" y1="23.0734" x2="21.8384" y2="21.8514" id="Stroke-11" stroke-linecap="square"></line>
-            </g>
-        </g>
-    </g>
+<svg width="34px" height="34px" viewBox="-1 -1  34 35" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    stroke="#000000" stroke-width="1.25" fill="none" fill-rule="evenodd" stroke-linecap="square">
+    <path d="M7.08,9.91 C7.08,11.47 8.35,12.74 9.91,12.74 C11.47,12.74 12.74,11.47 12.74,9.91 C12.74,8.34 11.47,7.08 9.91,7.08 C8.35,7.08 7.08,8.34 7.08,9.91 Z" stroke-linecap="round" stroke-linejoin="round"></path>
+    <line x1="0" y1="0" x2="9.2" y2="9.2"></line>
+    <polyline points="2.85 3.67 3 14.58 20.74 32.32 32.16 20.90 14.45 3.19 3.48 2.84"></polyline>
+    <line x1="16.95" y1="16.96" x2="15.72" y2="15.74"></line>
+    <path d="M19,14.92 L16,17.90 C15.40,18.51 15.40,19.48 16,20.09 C16.45,20.54 17.12,20.67 17.70,20.41 L21.08,18.39 C21.86,18.04 22.77,18.39 23.12,19.17 C23.38,19.76 23.25,20.45 22.78,20.90 L19.80,23.88"></path>
+    <line x1="23.06" y1="23.07" x2="21.83" y2="21.85"></line>
 </svg>
