@@ -1,4 +1,5 @@
 :root {
+    --white: #FFFFFE;
     --grid-template-areas:
     "header header header header header header header header header header"
     "kp kp ka ka vp vp bs bs be be"
@@ -6,7 +7,7 @@
     "mb mb mb mb mb if if if if if"
     "footer footer footer footer footer footer footer footer footer footer";
     --grid-template-columns: repeat(10, 1fr);
-    --grid-template-rows: auto repeat(3, 1fr) auto;
+    --grid-template-rows: min-content auto auto auto min-content;
 }
 
 @media (width < 40em) {
@@ -36,17 +37,14 @@
 }
 
 body {
-    margin: 0;
-    padding: 0;
     font-family: Arial, sans-serif;
-    background-color: #ECECEB;
-
+    background-color: #BBBBBB;
 }
 
 .grid-item {
     display: flex;
     flex-direction: column;
-    background-color: #FFFFFE;
+    background-color: var(--white);
     border: 1px solid #666;
     padding: 1em;
 }
@@ -54,7 +52,7 @@ body {
 .grid-container {
     display: grid;
     margin: 1em;
-    height: 92svh;
+    height: 96svh;
     grid-template-areas: var(--grid-template-areas);
     grid-template-columns: var(--grid-template-columns);
     grid-template-rows: var(--grid-template-rows);
@@ -62,12 +60,32 @@ body {
 
 header {
     grid-area: header;
+    display: flex;
+    flex-direction: row;
+    gap: 2em;
+}
+
+header h1 {
     font-size: 2em;
     font-weight: bold;
+    padding-block-end: 0.5em;
 }
+
+header div {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+header label {
+    font-weight: bold;
+    font-size: 0.8em;
+}
+
 
 footer {
     grid-area: footer;
+    padding-block-start: 0.5em;
 }
 
 footer span {

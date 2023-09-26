@@ -1,4 +1,7 @@
 const el = {};
+const mmc = {
+  current: []
+};
 
 function toggleItem(event) {
   event.preventDefault();
@@ -11,26 +14,75 @@ function toggleItem(event) {
   if (editableChild) {
     editableChild.focus();
   }
+  updateURL()
+}
 
+function updateURL() {
+  const inverseIds = [];
+  for (const element of document.querySelectorAll('.grid-item')) {
+    if (!element.classList.contains('lo')) {
+      inverseIds.push(element.id);
+    }
+  }
+  let fragment = ''
+  if (inverseIds.length > 0 && inverseIds.length < 9  ) {
+    fragment = inverseIds.join('-');
+  }
+  setFragment(fragment);
+}
+
+function setFragment(fragment) {
+  const url = `${window.location.pathname}${window.location.search}#${fragment}`;
+  window.history.replaceState(null, null, url);
 }
 
 function saveContent() {
-  const mmc = {};
+  mmc.current = [];
   for (const element of el.editableElements) {
     const parentWithId = element.closest('[id]');
     if (parentWithId) {
-      mmc[parentWithId.id] = element.innerHTML;
+      mmc.current.push({
+        id: parentWithId.id,
+        content: element.innerHTML
+      });
     }
   }
   localStorage.setItem('mmc', JSON.stringify(mmc));
 }
 
+
 function loadContent() {
-  const mmc = JSON.parse( localStorage.getItem('mmc') ?? "[]" );
-  for (const element of el.editableElements) {
-    const parentWithId = element.closest('[id]');
-    if (parentWithId && mmc.hasOwnProperty(parentWithId.id)) {
-      element.innerHTML = mmc[parentWithId.id];
+  const mmcString = localStorage.getItem('mmc');
+  if (mmcString) {
+    Object.assign(mmc, JSON.parse(mmcString));
+    for (const element of el.editableElements) {
+      const parentWithId = element.closest('[id]');
+      if (parentWithId) {
+        const item = mmc.current.find(item => item.id === parentWithId.id);
+        if (item) {
+          element.innerHTML = item.content;
+        }
+      }
+    }
+  }
+
+  handleFragment();
+}
+
+function handleFragment() {
+  const fragment = window.location.hash.slice(1);
+  if (fragment) {
+    const ids = fragment.split('-');
+    for (const id of ids) {
+      const element = document.getElementById(id);
+      if (element) {
+        element.classList.remove('lo');
+      }
+    }
+    for (const element of document.querySelectorAll('.grid-item')) {
+      if (!ids.includes(element.id)) {
+        element.classList.add('lo');
+      }
     }
   }
 }
@@ -48,6 +100,12 @@ function keyboardHandler(event) {
   } else if (event.key === 'Escape') {
     document.activeElement.blur();
   }
+  const gridItem = event.target.closest('.grid-item');
+  if (gridItem) {
+    if (gridItem.classList.contains('lo')) {
+      gridItem.classList.remove('lo');
+    }
+  }
 }
 
 function prep() {
@@ -56,6 +114,8 @@ function prep() {
 
   loadContent();
 
+  document.addEventListener('keydown', keyboardHandler);
+
   for (const item of el.gridItems) {
     item.addEventListener('click', toggleItem);
   }
@@ -63,8 +123,6 @@ function prep() {
   for (const element of el.editableElements) {
     element.addEventListener('input', saveContent);
   }
-  
-  document.addEventListener('keydown', keyboardHandler);
   
 }
 
