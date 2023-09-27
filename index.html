@@ -19,6 +19,13 @@
             <label for="by">Designed by</label>
             <p id="by" contenteditable>edit</p>
         </div>
+        <div>
+            <label for="sign-in">Sync with Google Drive</label>
+            <button class="google-button" id="sign-in">Sign in</button>
+            <button class="google-button" id="sign-out">Sign out</button>
+            <button class="google-button" id="sync-load">Load From Google Drive</button>
+            <button class="google-button" id="sync-save">Save to Google Drive</button>
+        </div>
         <img id="help" src="i/help.svg" alt="help">
     </header>
 
@@ -50,3 +57,6 @@
     <p><span class="key">Ctrl</span>+<span class="key">Escape</span> opens a dialog that will allow you to remove all your text from the page.</p>
     <button id="usage-close">OK</button>
 </dialog>
+
+<script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
