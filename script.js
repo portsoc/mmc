@@ -134,7 +134,7 @@ function openUsageDialog() {
   const dialog = document.querySelector('#usage');
   dialog.showModal();
   dialog.addEventListener('click', () => {
-    dialog.remove();
+    dialog.close();
   });
 }
 

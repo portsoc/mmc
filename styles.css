@@ -157,7 +157,7 @@ h2 img {
     box-shadow: inset 0 0 1em #F0F7;
 }
 
-dialog {
+dialog:modal {
     margin: auto;
     padding: 2em;
     display: flex;
