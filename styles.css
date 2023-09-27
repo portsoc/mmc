@@ -224,14 +224,16 @@ dialog button {
     background: var(--lightgrey);
 }
 
-#help {
+.icon {
     cursor: pointer;
     transition: all 0.2s linear;
     align-self: flex-start;
     filter: saturate(0%);
+    height: 34px;
+    width: 34px;
 }
 
-#help:hover {
+.icon:hover {
     transform: scale(1.1);
     filter: saturate(100%);
 }

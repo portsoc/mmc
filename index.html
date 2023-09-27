@@ -19,8 +19,18 @@
             <label for="by">Designed by</label>
             <p id="by" contenteditable>edit</p>
         </div>
-        <img id="help" src="i/help.svg" alt="help">
+        <img class="icon" id="import" src="i/imp.svg" alt="import" title="Import">
+        <img class="icon" id="export" src="i/exp.svg" alt="export" title="Copy to clipboard">
+        <img class="icon" id="help" src="i/help.svg" alt="help">
     </header>
+
+    <dialog id="import-diag">
+      <h3>Paste b64:</h3>
+      <textarea></textarea> 
+      <p>This will overwrite your current board.</p>
+      <p>Click anywhere to cancel.</p>
+      <button id="usage-close">Import</button>
+    </dialog>
 
     <div class="grid-item" id="kp"><h2 id="hkp">Key Partners <img aria-labelledby="hkp" src="i/kp.svg"></h2><section id="ekp" class="e" contenteditable="true"></section></div>
     <div class="grid-item" id="ka"><h2 id="hka">Key Activities <img aria-labelledby="hka" src="i/ka.svg"></h2><section id="eka" class="e" contenteditable="true"></section></div>
