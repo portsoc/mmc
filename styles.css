@@ -1,5 +1,10 @@
 :root {
     --white: #FFFFFE;
+    --black: #222222;
+    --superblack: #000000;
+    --darkgrey: #666666;
+    --lightgrey: #BBBBBB;
+    --uop1: #FF00FF77;
     --grid-template-areas:
     "header header header header header header header header header header"
     "kp kp ka ka vp vp bs bs be be"
@@ -30,22 +35,51 @@
         }
 }
 
+@media print {
+    :root {
+        --white: #ffffff;
+        --lightgrey: #ffffff;
+    }
+    :is(dialog, #help) {
+      display: none;
+    }
+    a {
+        color: var(--black);
+    }    
+}
+
+/* dark mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --white: #000000;
+        --black: #DFDFDF;
+        --superblack: #FFFFFF;
+        --darkgrey: #999999;
+        --lightgrey: #444444;
+        --uop1: #FF00FF77;
+    }
+    img {
+        filter: invert(1);
+    }
+}
+
 * {
     box-sizing: border-box;
     padding: 0;
-    margin: 0
+    margin: 0;
+    color: var(--black);
 }
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #BBBBBB;
+    background-color: var(--lightgrey);
 }
 
 .grid-item {
     display: flex;
     flex-direction: column;
     background-color: var(--white);
-    border: 1px solid #666;
+    border: 1px solid var(--darkgrey);
     padding: 1em;
 }
 
@@ -146,7 +180,7 @@ h2 img {
 }
 
 .hi {
-    box-shadow: inset 0 0 1em #F0F7;
+    box-shadow: inset 0 0 1em var(--uop1);
 }
 
 .lo {
@@ -154,7 +188,7 @@ h2 img {
 }
 
 .grid-item:has(*:focus) {
-    box-shadow: inset 0 0 1em #F0F7;
+    box-shadow: inset 0 0 1em var(--uop1);
 }
 
 dialog:modal {
@@ -162,6 +196,7 @@ dialog:modal {
     padding: 2em;
     display: flex;
     flex-direction: column;
+    background: var(--white)
 }
 
 dialog p {
@@ -186,21 +221,29 @@ dialog::backdrop {
 dialog button {
     align-self: flex-end;
     padding: 0.5em;
+    background: var(--lightgrey);
 }
 
 #help {
+    cursor: pointer;
     transition: all 0.2s linear;
     align-self: flex-start;
+    filter: saturate(0%);
 }
 
 #help:hover {
-    transform: scale(1.2);
+    transform: scale(1.1);
+    filter: saturate(100%);
 }
 
 .key {
-    background: #00000022;
+    background: var(--lightgrey);
     padding: 0.2em;
-    border: thin dashed #000;
+    border: thin dashed var(--black);
     border-radius: 0.2em;
     font-weight: bold;
+}
+
+strong {
+    color: var(--superblack);
 }
