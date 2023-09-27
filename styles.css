@@ -247,3 +247,23 @@ dialog button {
 strong {
     color: var(--superblack);
 }
+
+.google-button {
+    background: var(--white);
+    border: 1px solid var(--darkgrey);
+    border-radius: 0.2em;
+    padding: 0.1em;
+    margin: 0.1em;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2em;
+    cursor: pointer;
+    transition: all 0.2s linear;
+}
+
+.google-button:hover {
+    transform: scale(1.1);
+}
+
