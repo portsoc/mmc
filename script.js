@@ -89,7 +89,7 @@ function handleFragment() {
 
 function keyboardHandler(event) {
   if (event.ctrlKey && event.key === 'Escape') {
-    const confirmed = confirm('Are you sure you want to reset the page?');
+    const confirmed = confirm('Are you sure you want to remove all text from this page?');
     if (confirmed) {
       for (const element of el.editableElements) {
         element.innerHTML = '';
@@ -111,6 +111,7 @@ function keyboardHandler(event) {
 function prep() {
   el.gridItems = document.querySelectorAll('.grid-item');
   el.editableElements = document.querySelectorAll('[contenteditable]');
+  el.help = document.querySelector('#help');
 
   loadContent();
 
@@ -123,7 +124,18 @@ function prep() {
   for (const element of el.editableElements) {
     element.addEventListener('input', saveContent);
   }
-  
+
+  el.help.addEventListener('click', openUsageDialog);
+
+
+}
+
+function openUsageDialog() {
+  const dialog = document.querySelector('#usage');
+  dialog.showModal();
+  dialog.addEventListener('click', () => {
+    dialog.remove();
+  });
 }
 
 window.addEventListener('load', prep);

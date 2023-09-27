@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="34px" height="34px" viewBox="0 0 1000 1000" version="1.1" xmlns="http://www.w3.org/2000/svg" stroke="none">
+    <title>Help</title>
+    <circle id="Oval" fill="#669AE0" cx="500" cy="500" r="500"></circle>
+    <path d="M500,150 C610.5,150 700,239.5 700,350 C700,426.1 657.5,492.2 595,526 L595,526.1 C561.9,547.5 540,584.7 540,627 C540,628 540,629 540,630 L460,630 C460,629 460,628 460,627 C460,551 502.1,485.3 564.2,451.38 C597.75,430.1 620,392.6 620,350 C620,283.7 566.3,230 500,230 C433.7,230 380,283.7 380,350 L300,350 C300,239.5 389.54305,150 500,150 Z" id="Path" stroke="#FFFFFF" stroke-width="21" fill="#FFFFFF"></path>
+    <circle id="Oval" stroke="#FFFFFF" stroke-width="21" fill="#FFFFFF" cx="500" cy="770" r="80"></circle>
+</svg>

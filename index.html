@@ -16,9 +16,10 @@
             <p id="mmd" contenteditable>edit</p>
         </div>
         <div>
-            <label for="mmd">Designed by</label>
+            <label for="by">Designed by</label>
             <p id="by" contenteditable>edit</p>
         </div>
+        <img id="help" src="i/help.svg" alt="help">
     </header>
 
     <div class="grid-item" id="kp"><h2 id="hkp">Key Partners <img aria-labelledby="hkp" src="i/kp.svg"></h2><section id="ekp" class="e" contenteditable="true"></section></div>
@@ -35,3 +36,17 @@
         <p><span>Designed by:</span> Strategyzer AG & Steve Blank.  Built for the web at Uni. of Portsmouth.
     </footer>
 </div>
+
+<dialog id="usage">
+    <h1>Using the Mission Model Canvas.</h1>
+    <p>The MMC comprises nine sections ("Key Partners", "Key Activities", etc).
+    <h2>Editing</h2>
+    <p><strong>Click</strong> a section to begin editing it: a highlight will appear and you'll see a flashing caret where you can enter text.
+    <p><strong>Click outside</strong> a section or press <span class="key">Escape</span> to stop editing.
+    <h2>Defocusing</h2>
+    <p><strong><span class="key">Shift</span>-click</strong> a section to defocus it (it will blend more into the background).
+    <p><strong>Type</strong> in any defocused area will automatically refocus it.
+    <h2>Reset</h2>
+    <p><span class="key">Ctrl</span>+<span class="key">Escape</span> opens a dialog that will allow you to remove all your text from the page.</p>
+    <button id="usage-close">OK</button>
+</dialog>

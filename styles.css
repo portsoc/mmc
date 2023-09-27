@@ -156,3 +156,51 @@ h2 img {
 .grid-item:has(*:focus) {
     box-shadow: inset 0 0 1em #F0F7;
 }
+
+dialog {
+    margin: auto;
+    padding: 2em;
+    display: flex;
+    flex-direction: column;
+}
+
+dialog p {
+    padding-block-start: 0.3em;
+}
+
+dialog h2 {
+    padding-block-start: 2em;
+}
+
+
+dialog::backdrop {
+    background: repeating-linear-gradient(
+      45deg,
+      #009EE277,
+      #62136077,
+      #0076A677,
+      #3C023877
+    );
+  }
+  
+dialog button {
+    align-self: flex-end;
+    padding: 0.5em;
+}
+
+#help {
+    transition: all 0.2s linear;
+    align-self: flex-start;
+}
+
+#help:hover {
+    transform: scale(1.2);
+}
+
+.key {
+    background: #00000022;
+    padding: 0.2em;
+    border: thin dashed #000;
+    border-radius: 0.2em;
+    font-weight: bold;
+}
