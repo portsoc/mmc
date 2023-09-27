@@ -112,6 +112,8 @@ function prep() {
   el.gridItems = document.querySelectorAll('.grid-item');
   el.editableElements = document.querySelectorAll('[contenteditable]');
   el.help = document.querySelector('#help');
+  el.importDialog = document.querySelector('#import');
+  el.exportDialog = document.querySelector('#export');
 
   loadContent();
 
@@ -127,6 +129,12 @@ function prep() {
 
   el.help.addEventListener('click', openUsageDialog);
 
+  el.importDialog.addEventListener('click', openImportDialog);
+
+  el.exportDialog.addEventListener('click', () => {
+    const mmcStringified = JSON.stringify(mmc); 
+    navigator.clipboard.writeText(btoa(mmcStringified));
+  });
 
 }
 
@@ -135,6 +143,39 @@ function openUsageDialog() {
   dialog.showModal();
   dialog.addEventListener('click', () => {
     dialog.close();
+  });
+}
+
+function openImportDialog() {
+  const dialog = document.querySelector('#import-diag');
+  const textbox = dialog.querySelector('textarea');
+  const button = dialog.querySelector('button');
+  dialog.showModal();
+
+  function handler() {
+    try { 
+      localStorage.setItem('mmc', atob(textbox.value));
+      loadContent();
+    } catch {
+      dialog.close();
+      alert('Import failed');
+    }
+  }
+  
+  button.addEventListener('click', () => {
+    handler();
+  });
+
+  dialog.addEventListener('click', (e) => {
+    if (e.target == dialog) {
+     dialog.close(); 
+    } 
+  });
+
+  dialog.addEventListener('keypress', (e) => {
+    if (e.key == 'Enter') {
+      handler(); 
+    } 
   });
 }
 
