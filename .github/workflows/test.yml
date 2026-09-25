@@ -18,6 +18,7 @@ jobs:
       - run: npx -y firebase-tools@latest emulators:exec --only database --project demo-mmc "npm --prefix test run test:rtdb"
       # Browser tests: the app has the real project id built in, so the
       # emulators must use it too. Nothing here reaches production.
+      - run: npm ci && npm run build
       - run: npm ci --prefix functions
       - run: npx --prefix test playwright install --with-deps chromium
       - run: npx -y firebase-tools@latest emulators:exec --project mission-mmc-4476 "npm --prefix test run test:e2e"

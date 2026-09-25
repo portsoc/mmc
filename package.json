@@ -1,0 +1,13 @@
+{
+  "name": "mmc",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "firebase": "11.0.0",
+    "yjs": "^13.6.33"
+  }
+}

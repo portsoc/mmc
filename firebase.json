@@ -9,12 +9,18 @@
       "work-packages/**",
       "functions/**",
       "test/**",
-      "AGENTS.md"
+      "AGENTS.md",
+      "package.json",
+      "package-lock.json",
+      "build.mjs"
     ],
     "rewrites": [
       {
         "source": "/mcp",
-        "function": { "functionId": "mcp", "region": "us-central1" }
+        "function": {
+          "functionId": "mcp",
+          "region": "us-central1"
+        }
       },
       {
         "source": "/view/**",
@@ -33,15 +39,24 @@
       {
         "source": "**/*.@(html|js)",
         "headers": [
-          { "key": "Cache-Control", "value": "no-cache" }
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
         ]
       },
       {
         "source": "**/*.@(css|png|jpg|jpeg|svg|ico)",
         "headers": [
-          { "key": "Cache-Control", "value": "max-age=3600" }
+          {
+            "key": "Cache-Control",
+            "value": "max-age=3600"
+          }
         ]
       }
+    ],
+    "predeploy": [
+      "npm run build"
     ]
   },
   "firestore": {
@@ -56,12 +71,25 @@
     "runtime": "nodejs22"
   },
   "emulators": {
-    "auth": { "port": 9099 },
-    "firestore": { "port": 8180 },
-    "database": { "port": 9000 },
-    "functions": { "port": 5001 },
-    "hosting": { "port": 5000 },
-    "ui": { "enabled": true, "port": 4000 },
+    "auth": {
+      "port": 9099
+    },
+    "firestore": {
+      "port": 8180
+    },
+    "database": {
+      "port": 9000
+    },
+    "functions": {
+      "port": 5001
+    },
+    "hosting": {
+      "port": 5000
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    },
     "singleProjectMode": true
   }
 }
