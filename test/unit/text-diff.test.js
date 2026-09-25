@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import * as Y from 'yjs';
-import { applyTextDiff } from '../../js/text-diff.js';
+import { applyTextDiff, changedChars } from '../../js/text-diff.js';
 
 function pair(initial) {
   const a = new Y.Doc();
@@ -25,4 +25,13 @@ test('concurrent edits in the same field both survive', () => {
   Y.applyUpdate(b, Y.encodeStateAsUpdate(a));
   assert.equal(a.getText('f').toString(), 'line one A\nline two B');
   assert.equal(b.getText('f').toString(), a.getText('f').toString());
+});
+
+test('changedChars counts only the edited span, not the whole field', () => {
+  const long = 'x'.repeat(500);
+  assert.equal(changedChars(long, long + 'a'), 1);
+  assert.equal(changedChars('hello world', 'hello brave world'), 6);
+  assert.equal(changedChars('hello world', 'hello'), 6);
+  assert.equal(changedChars('cat', 'cut'), 2);
+  assert.equal(changedChars('same', 'same'), 0);
 });

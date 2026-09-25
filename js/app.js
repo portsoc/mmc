@@ -29,6 +29,7 @@ import {
 import { applyLocalItems, bindCollaborativeFields, colorForUser, itemsFromY, setDomSyncPaused, setFieldTexts } from './collab.js';
 import { createWaypoint, maybeCreateDailySnapshot, restoreVersion } from './versions.js';
 import { recordEdit, getContributionMetrics } from './metrics.js';
+import { changedChars } from './text-diff.js';
 import { PlaybackController } from './playback.js';
 import { canEdit, isOwner } from './roles.js';
 import { showCanvasList, showCanvasListSkeleton, showCanvasListError } from './canvas-list.js';
@@ -384,6 +385,31 @@ async function refreshContributorHighlight() {
   }
 }
 
+/** Credit each local edit with the characters it changed. beforeinput/input
+ * fire only for this user's typing, so collaborators' edits aren't counted. */
+function wireEditMetrics() {
+  const fieldOf = (target) => {
+    for (const [fieldId, domId] of Object.entries(FIELD_ELEMENT_IDS)) {
+      if (target?.closest?.(`#${domId}`)) return [fieldId, document.getElementById(domId)];
+    }
+    return [null, null];
+  };
+  let before = null; // { fieldId, text }
+  document.addEventListener('beforeinput', (e) => {
+    const [fieldId, el] = fieldOf(e.target);
+    before = fieldId ? { fieldId, text: el.textContent || '' } : null;
+  });
+  document.addEventListener('input', (e) => {
+    const [fieldId, el] = fieldOf(e.target);
+    if (!fieldId || before?.fieldId !== fieldId) return;
+    const chars = changedChars(before.text, el.textContent || '');
+    before = null;
+    if (chars && state.canvasId && !state.readOnly && currentUser.value) {
+      recordEdit(state.canvasId, fieldId, currentUser.value.uid, firstName(currentUser.value), chars);
+    }
+  });
+}
+
 function wireMetricsModal() {
   const modal = document.getElementById('metrics-modal');
   document.getElementById('metrics-btn')?.addEventListener('click', async () => {
@@ -624,9 +650,6 @@ function initRaggedLinks(els) {
     if (state.canvasId && !state.readOnly) {
       applyLocalItems(state.collab, fieldId, items);
       scheduleSave(fieldId, items);
-      if (currentUser.value) {
-        recordEdit(state.canvasId, fieldId, currentUser.value.uid, firstName(currentUser.value), newText.length);
-      }
     }
   });
 }
@@ -973,11 +996,7 @@ async function init() {
     for (const fieldId of ['title', 'by']) {
       const el = els[fieldId];
       el?.addEventListener('input', (e) => {
-        const text = e.target.textContent || '';
-        scheduleSave(fieldId, text);
-        if (currentUser.value) {
-          recordEdit(state.canvasId, fieldId, currentUser.value.uid, firstName(currentUser.value), text.length);
-        }
+        scheduleSave(fieldId, e.target.textContent || '');
       });
     }
 
@@ -988,6 +1007,7 @@ async function init() {
   const history = wireHistory();
   wireNameVersion(() => history.reload());
   wireMetricsModal();
+  wireEditMetrics();
   refreshContributorHighlight();
 }
 
