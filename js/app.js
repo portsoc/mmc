@@ -7,7 +7,7 @@
 // vanilla local-only canvas keeps working per the "graceful fallback"
 // design invariant.
 import { initCanvasChrome } from './canvas-chrome.js';
-import { initAuth, currentUser, onUser, signInWithGoogle, firstName } from './auth.js';
+import { initAuth, currentUser, onUser, signInWithGoogle } from './auth.js';
 import { functions, onRtdbConnectionChange } from './firebase-config.js';
 import { httpsCallable } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-functions.js';
 import {
@@ -16,21 +16,20 @@ import {
   setInBin,
   getCanvas,
   getCanvasIdFromToken,
-  updateField,
-  updateSectionItems,
   upgradeCanvasItems,
   redeemInvite
 } from './canvas-data.js';
-import { applyLocalItems, bindCollaborativeFields, colorForUser, itemsFromY } from './collab.js';
+import { applyLocalItems, bindCollaborativeFields, itemsFromY } from './collab.js';
 import { maybeCreateDailySnapshot } from './versions.js';
 import { canEdit, isOwner } from './roles.js';
 import { showCanvasList, showCanvasListSkeleton, showCanvasListError } from './canvas-list.js';
 import { RaggedLinksController } from './ragged-links.js';
 import { normalizeCanvas } from './item-migration.js';
-import { PanelFocusManager, CANVAS_PANELS } from './panel-focus.js';
 import { errorReporter } from './error-reporter.js';
 import { syncFeedback, toastManager } from './feedback.js';
-import { FIELD_ELEMENT_IDS, state, elementsById } from './app-state.js';
+import { state, elementsById } from './app-state.js';
+import { scheduleSave } from './saving.js';
+import { initPanelFocus, wirePresence } from './presence.js';
 import { wireHistory } from './history-panel.js';
 import { refreshContributorHighlight, wireEditMetrics, wireMetricsModal } from './contributors.js';
 import { wireSettings, wireDiagnosticsModal, wireAppMenu, wireShareModal, wireNameVersion } from './dialogs.js';
@@ -88,25 +87,6 @@ async function resolveCanvasId() {
   return null;
 }
 
-function renderPresence(awarenessState) {
-  const container = document.getElementById('presence-avatars');
-  if (!container) return;
-  container.innerHTML = '';
-  for (const [uid, info] of Object.entries(awarenessState || {})) {
-    const pill = document.createElement('div');
-    pill.className = 'presence-avatar';
-    pill.style.background = colorForUser(uid);
-    pill.title = info.name || 'Collaborator';
-    pill.textContent = (info.name || '?').slice(0, 1).toUpperCase();
-    container.appendChild(pill);
-  }
-}
-
-/** Shows the full-screen login gate. signInWithGoogle() navigates the whole
- * page to Google and back (see auth.js) rather than returning here — so
- * this never resolves in the tab that showed the gate. The tab that comes
- * back from the redirect re-runs init() from scratch, and initAuth() there
- * finds currentUser.value already set, so the gate is skipped entirely. */
 // Same owner test as firestore.rules, which only lets the owner restore.
 function showBinNotice(canRestore) {
   document.getElementById('bin-notice').hidden = false;
@@ -128,6 +108,11 @@ function showBinNotice(canRestore) {
   });
 }
 
+/** Shows the full-screen login gate. signInWithGoogle() navigates the whole
+ * page to Google and back (see auth.js) rather than returning here — so
+ * this never resolves in the tab that showed the gate. The tab that comes
+ * back from the redirect re-runs init() from scratch, and initAuth() there
+ * finds currentUser.value already set, so the gate is skipped entirely. */
 function awaitGoogleSignIn() {
   const gate = document.getElementById('login-gate');
   const btn = document.getElementById('login-google-btn');
@@ -147,39 +132,6 @@ function awaitGoogleSignIn() {
   });
 }
 
-// The saved copy in Firestore is derived from the merged live doc, not from
-// one editor's view, and written once edits pause rather than per keystroke —
-// otherwise concurrent typists overwrite each other's latest edit there.
-const SAVE_DELAY_MS = 2000;
-const pendingSaves = new Map(); // fieldId -> fallback value if there is no live doc
-let saveTimer = null;
-
-function scheduleSave(fieldId, fallback) {
-  pendingSaves.set(fieldId, fallback);
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(flushSaves, SAVE_DELAY_MS);
-}
-
-function flushSaves() {
-  clearTimeout(saveTimer);
-  saveTimer = null;
-  if (!state.canvasId || state.readOnly) return pendingSaves.clear();
-  for (const [fieldId, fallback] of pendingSaves) {
-    const yarr = state.collab?.yItems?.[fieldId];
-    const ytext = state.collab?.yFields?.[fieldId];
-    const save = Array.isArray(fallback)
-      ? updateSectionItems(state.canvasId, fieldId, yarr ? itemsFromY(yarr) : fallback)
-      : updateField(state.canvasId, fieldId, ytext ? ytext.toString() : fallback);
-    save.catch((err) => console.warn('[app] saving', fieldId, 'failed:', err));
-  }
-  pendingSaves.clear();
-}
-
-addEventListener('pagehide', flushSaves);
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') flushSaves();
-});
-
 function initRaggedLinks(els) {
   if (!els) return;
   state.raggedLinks = new RaggedLinksController(els, (fieldId, items, newText) => {
@@ -187,99 +139,6 @@ function initRaggedLinks(els) {
       applyLocalItems(state.collab, fieldId, items);
       scheduleSave(fieldId, items);
     }
-  });
-}
-
-function initPanelFocus() {
-  if (state.panelFocus) return;
-
-  const gridEls = {};
-  for (const pid of CANVAS_PANELS) {
-    gridEls[pid] = document.getElementById(pid);
-  }
-
-  state.panelFocus = new PanelFocusManager(gridEls, ({ panelId, itemId, itemIndex, offset, immediate }) => {
-    if (state.collab?.provider && currentUser.value) {
-      state.collab.provider.setLocalAwareness(currentUser.value.uid, {
-        name: firstName(currentUser.value),
-        color: colorForUser(currentUser.value.uid),
-        panelId,
-        itemId,
-        itemIndex,
-        offset
-      }, immediate);
-    }
-  });
-
-  if (currentUser.value) {
-    state.panelFocus.setMyUid(currentUser.value.uid);
-  }
-
-  const getTargetPanelId = (el) => {
-    if (!el || el === document.body) return null;
-    const gridItem = el.closest?.('.grid-item');
-    if (gridItem && CANVAS_PANELS.includes(gridItem.id)) return gridItem.id;
-    const sec = el.closest?.('.e');
-    if (sec && sec.id?.startsWith('e')) {
-      const pid = sec.id.slice(1);
-      if (CANVAS_PANELS.includes(pid)) return pid;
-    }
-    return null;
-  };
-
-  const getActiveItemInfo = (target) => {
-    const li = target?.closest?.('li');
-    const itemId = li?.dataset?.id || null;
-    let itemIndex = null;
-    if (li && li.parentElement) {
-      itemIndex = Array.prototype.indexOf.call(li.parentElement.children, li);
-    }
-    const sel = window.getSelection?.();
-    const offset = sel ? sel.focusOffset : 0;
-    return { itemId, itemIndex: itemIndex >= 0 ? itemIndex : null, offset };
-  };
-
-  // Focus event: entering an editable element
-  document.addEventListener('focusin', (e) => {
-    const panelId = getTargetPanelId(e.target);
-    if (panelId) {
-      const { itemId, itemIndex, offset } = getActiveItemInfo(e.target);
-      state.panelFocus.setLocalFocus(panelId, itemId, offset, true, itemIndex);
-    } else {
-      state.panelFocus.setLocalFocus(null);
-    }
-  });
-
-  // Focusout event: leaving an element
-  document.addEventListener('focusout', () => {
-    setTimeout(() => {
-      const active = document.activeElement;
-      const panelId = getTargetPanelId(active);
-      if (!panelId) {
-        state.panelFocus.setLocalFocus(null);
-      }
-    }, 10);
-  });
-
-  // Track cursor and typing position within active panel
-  const handleCursorMove = (immediate = false) => {
-    if (!state.panelFocus?.localPanelId) return;
-    const sel = window.getSelection?.();
-    if (!sel || !sel.anchorNode) return;
-    const node = sel.anchorNode.nodeType === Node.ELEMENT_NODE ? sel.anchorNode : sel.anchorNode.parentElement;
-    const panelId = getTargetPanelId(node);
-    if (panelId === state.panelFocus.localPanelId) {
-      const { itemId, itemIndex, offset } = getActiveItemInfo(node);
-      state.panelFocus.setLocalFocus(panelId, itemId, offset, immediate, itemIndex);
-    }
-  };
-
-  document.addEventListener('selectionchange', () => handleCursorMove(false));
-  document.addEventListener('input', () => handleCursorMove(false));
-
-  // Focus modal closing
-  document.getElementById('focus-modal')?.addEventListener('close', () => {
-    state.panelFocus?.setLocalFocus(null);
   });
 }
 
@@ -301,14 +160,9 @@ function reportLoad() {
   console.info('[load] ' + loadMarks.map(([stage, t]) => { const d = t - prev; prev = t; return `${stage} +${d}ms`; }).join(' · ') + ` = ${prev}ms`);
 }
 
-async function init() {
-  markLoad('script');
-  initPanelFocus();
-
-  // Initialize diagnostics and user feedback
+/** Sync-status pill, offline/online toasts and error reporting. */
+function wireFeedback() {
   const { openDiagnostics } = wireDiagnosticsModal();
-  wireAppMenu();
-  wireSettings();
 
   const syncStatusEl = document.getElementById('sync-status');
   if (syncStatusEl) {
@@ -347,23 +201,17 @@ async function init() {
     errorReporter.setContext({ uid: user?.uid || null });
     for (const el of document.querySelectorAll('[data-needs-account]')) el.hidden = !user;
   });
+}
 
-  if (window.location.pathname === '/canvases') showCanvasListSkeleton();
-  try {
-    await initAuth();
-    markLoad('auth');
-  } catch (err) {
-    console.warn('[app] Firebase auth unavailable, staying in local-only mode:', err.message);
-    initRaggedLinks(elementsById());
-    doneLoading();
-    return;
-  }
-
+/** Turns the URL into a concrete state.canvasId, signing in, listing or
+ * creating a canvas on the way as needed. Returns false when the page has
+ * become something else (sign-in gate, canvas list, local-only mode). */
+async function routeToCanvas() {
   state.canvasId = await resolveCanvasId();
   if (!state.canvasId) {
     initRaggedLinks(elementsById());
     doneLoading(); // legacy local-only mode; nothing further to wire
-    return;
+    return false;
   }
   errorReporter.setContext({ canvasId: state.canvasId });
 
@@ -374,7 +222,7 @@ async function init() {
   // tab that comes back from Google re-runs init() and finds currentUser set.
   if (!state.readOnly && !currentUser.value) {
     awaitGoogleSignIn();
-    return;
+    return false;
   }
 
   // Bare root opens your only canvas, starts one if you have none, and lists
@@ -387,7 +235,7 @@ async function init() {
     } catch (err) {
       console.warn('[app] Could not list canvases:', err.message);
       showCanvasListError(currentUser.value);
-      return;
+      return false;
     }
     const live = canvases.filter((c) => !c.binnedAt);
     const hasBin = canvases.some((c) => c.binnedAt && c.ownerId === currentUser.value.uid);
@@ -395,7 +243,7 @@ async function init() {
     // offer, rather than quietly starting a fresh canvas.
     if (route === 'LIST' || live.length > 1 || (live.length === 0 && hasBin)) {
       showCanvasList(canvases, currentUser.value);
-      return;
+      return false;
     }
     state.canvasId = live[0]?.id ?? 'NEW';
   }
@@ -405,16 +253,11 @@ async function init() {
 
   // Signed-out visitors on a public link have no canvases of their own.
   for (const el of document.querySelectorAll('[data-needs-account]')) el.hidden = !currentUser.value;
+  return true;
+}
 
-  markLoad('route');
-  const canvas = await getCanvas(state.canvasId);
-  markLoad('firestore');
-  if (!canvas) {
-    console.warn('[app] Canvas not found for id', state.canvasId);
-    doneLoading();
-    return;
-  }
-
+/** Works out this visitor's access and puts the saved text on the page. */
+function renderCanvas(canvas) {
   // Normalize canvas to ensure both `items` and `fields` are populated and in sync
   const normalizedCanvas = normalizeCanvas(canvas);
 
@@ -461,81 +304,96 @@ async function init() {
       }
     }
   }
+  return { els, normalizedCanvas };
+}
 
+/** Joins the live session, shows any newer text it has, and starts saving. */
+async function startLiveSync(els, normalizedCanvas) {
+  try {
+    state.collab = await bindCollaborativeFields(state.canvasId, els, normalizedCanvas.fields, normalizedCanvas.items, (fieldId, remoteValue) => {
+      if (['title', 'by'].includes(fieldId)) {
+        const el = els[fieldId];
+        if (el && el.textContent !== remoteValue) {
+          el.textContent = remoteValue;
+        }
+      } else if (state.raggedLinks) {
+        const el = els[fieldId];
+        if (el) {
+          state.raggedLinks.setSectionItems(el, remoteValue);
+        }
+      }
+    });
+
+    if (state.collab?.yFields) {
+      // If Yjs already had history from an active peer in RTDB that differs from canvas.fields, sync it to DOM
+      for (const [fieldId, ytext] of Object.entries(state.collab.yFields)) {
+        const val = ytext.toString();
+        if (val && val !== (normalizedCanvas.fields?.[fieldId] ?? '') && els[fieldId]) {
+          els[fieldId].textContent = val;
+        }
+      }
+      for (const [fieldId, yarr] of Object.entries(state.collab.yItems)) {
+        const live = itemsFromY(yarr);
+        if (live.length && state.raggedLinks && els[fieldId]
+          && JSON.stringify(live) !== JSON.stringify(state.raggedLinks.serializeSectionItems(els[fieldId]))) {
+          state.raggedLinks.setSectionItems(els[fieldId], live);
+        }
+      }
+
+      wirePresence(state.collab.provider);
+    }
+  } catch (err) {
+    console.warn('[app] Collaborative binding error, continuing with local editing:', err);
+  } finally {
+    markLoad('live-sync');
+    doneLoading();
+    reportLoad();
+  }
+
+  for (const fieldId of ['title', 'by']) {
+    const el = els[fieldId];
+    el?.addEventListener('input', (e) => {
+      scheduleSave(fieldId, e.target.textContent || '');
+    });
+  }
+}
+
+async function init() {
+  markLoad('script');
+  initPanelFocus();
+  wireFeedback();
+  wireAppMenu();
+  wireSettings();
+
+  if (window.location.pathname === '/canvases') showCanvasListSkeleton();
+  try {
+    await initAuth();
+    markLoad('auth');
+  } catch (err) {
+    console.warn('[app] Firebase auth unavailable, staying in local-only mode:', err.message);
+    initRaggedLinks(elementsById());
+    doneLoading();
+    return;
+  }
+
+  if (!(await routeToCanvas())) return;
+
+  markLoad('route');
+  const canvas = await getCanvas(state.canvasId);
+  markLoad('firestore');
+  if (!canvas) {
+    console.warn('[app] Canvas not found for id', state.canvasId);
+    doneLoading();
+    return;
+  }
+
+  const { els, normalizedCanvas } = renderCanvas(canvas);
   markLoad('render');
   if (state.readOnly) {
     doneLoading();
     reportLoad();
   } else {
-    try {
-      state.collab = await bindCollaborativeFields(state.canvasId, els, normalizedCanvas.fields, normalizedCanvas.items, (fieldId, remoteValue) => {
-        if (['title', 'by'].includes(fieldId)) {
-          const el = els[fieldId];
-          if (el && el.textContent !== remoteValue) {
-            el.textContent = remoteValue;
-          }
-        } else if (state.raggedLinks) {
-          const el = els[fieldId];
-          if (el) {
-            state.raggedLinks.setSectionItems(el, remoteValue);
-          }
-        }
-      });
-
-      if (state.collab?.yFields) {
-        // If Yjs already had history from an active peer in RTDB that differs from canvas.fields, sync it to DOM
-        for (const [fieldId, ytext] of Object.entries(state.collab.yFields)) {
-          const val = ytext.toString();
-          if (val && val !== (normalizedCanvas.fields?.[fieldId] ?? '') && els[fieldId]) {
-            els[fieldId].textContent = val;
-          }
-        }
-        for (const [fieldId, yarr] of Object.entries(state.collab.yItems)) {
-          const live = itemsFromY(yarr);
-          if (live.length && state.raggedLinks && els[fieldId]
-            && JSON.stringify(live) !== JSON.stringify(state.raggedLinks.serializeSectionItems(els[fieldId]))) {
-            state.raggedLinks.setSectionItems(els[fieldId], live);
-          }
-        }
-
-        const { provider } = state.collab;
-        onUser((user) => {
-          if (!user) {
-            if (currentUser.value) {
-              provider.clearLocalAwareness(currentUser.value.uid);
-            }
-            return;
-          }
-          state.panelFocus?.setMyUid(user.uid);
-          provider.setLocalAwareness(user.uid, {
-            name: firstName(user),
-            color: colorForUser(user.uid),
-            panelId: state.panelFocus?.localPanelId || null,
-            itemId: state.panelFocus?.localItemId || null,
-            itemIndex: state.panelFocus?.localItemIndex || null,
-            offset: state.panelFocus?.localOffset || 0
-          }, true);
-        });
-        provider.onAwarenessChange((awareness) => {
-          renderPresence(awareness);
-          state.panelFocus?.updateRemoteAwareness(awareness);
-        });
-      }
-    } catch (err) {
-      console.warn('[app] Collaborative binding error, continuing with local editing:', err);
-    } finally {
-      markLoad('live-sync');
-      doneLoading();
-      reportLoad();
-    }
-
-    for (const fieldId of ['title', 'by']) {
-      const el = els[fieldId];
-      el?.addEventListener('input', (e) => {
-        scheduleSave(fieldId, e.target.textContent || '');
-      });
-    }
-
+    await startLiveSync(els, normalizedCanvas);
     await maybeCreateDailySnapshot(state.canvasId, currentUser.value);
   }
 
