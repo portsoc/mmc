@@ -9,6 +9,7 @@ import { rtdb } from './firebase-config.js';
 import { ref, onValue, push, onDisconnect, set as rtdbSet } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js';
 import { FIELD_IDS } from './canvas-data.js';
 import { errorReporter } from './error-reporter.js';
+import { applyTextDiff } from './text-diff.js';
 
 const PRESENCE_COLORS = ['#0076A6', '#621360', '#FF00FF', '#008148', '#B85C00'];
 
@@ -157,12 +158,7 @@ export async function bindCollaborativeFields(canvasId, elementsById, canvasFiel
         el.textContent = ytext.toString();
       }
       el.addEventListener('input', () => {
-        const newValue = el.textContent || '';
-        if (ytext.toString() === newValue) return;
-        ydoc.transact(() => {
-          ytext.delete(0, ytext.length);
-          ytext.insert(0, newValue);
-        }, provider._localOrigin);
+        applyTextDiff(ytext, el.textContent || '', provider._localOrigin);
       });
     }
 

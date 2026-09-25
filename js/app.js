@@ -27,6 +27,7 @@ import {
   setPublicReadOnly
 } from './canvas-data.js';
 import { bindCollaborativeFields, colorForUser, setDomSyncPaused, setFieldTexts } from './collab.js';
+import { applyTextDiff } from './text-diff.js';
 import { createWaypoint, maybeCreateDailySnapshot, restoreVersion } from './versions.js';
 import { recordEdit, getContributionMetrics } from './metrics.js';
 import { PlaybackController } from './playback.js';
@@ -579,13 +580,7 @@ function initRaggedLinks(els) {
         console.warn('[app] updateSectionItems failed:', err);
       });
       if (state.collab?.yFields?.[fieldId]) {
-        const ytext = state.collab.yFields[fieldId];
-        if (ytext.toString() !== newText) {
-          state.collab.ydoc.transact(() => {
-            ytext.delete(0, ytext.length);
-            ytext.insert(0, newText);
-          }, state.collab.provider._localOrigin);
-        }
+        applyTextDiff(state.collab.yFields[fieldId], newText, state.collab.provider._localOrigin);
       }
       if (currentUser.value) {
         recordEdit(state.canvasId, fieldId, currentUser.value.uid, firstName(currentUser.value), newText.length);
