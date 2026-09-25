@@ -943,7 +943,7 @@ a.app-menu-item {
 }
 
 /* "Your canvases" page */
-.canvas-list {
+.canvases-page {
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
