@@ -34,7 +34,7 @@ import { PlaybackController } from './playback.js';
 import { canEdit, isOwner } from './roles.js';
 import { showCanvasList, showCanvasListSkeleton, showCanvasListError } from './canvas-list.js';
 import { RaggedLinksController } from './ragged-links.js';
-import { normalizeCanvas } from './item-migration.js';
+import { normalizeCanvas, itemsToSyncText } from './item-migration.js';
 import { PanelFocusManager, CANVAS_PANELS } from './panel-focus.js';
 import { errorReporter } from './error-reporter.js';
 import { syncFeedback, toastManager } from './feedback.js';
@@ -545,7 +545,11 @@ function wireHistory() {
     const restored = await restoreVersion(state.canvasId, version.id, currentUser.value);
     const restoredFields = restored?.fields || version.fields;
     const restoredItems = restored?.items || version.items;
-    setFieldTexts(state.collab.ydoc, state.collab.yFields, restoredFields, state.collab.provider._localOrigin);
+    const syncTexts = Object.fromEntries(Object.entries(restoredFields).map(([fieldId, text]) => [
+      fieldId,
+      restoredItems?.[fieldId] ? itemsToSyncText(restoredItems[fieldId]) : text
+    ]));
+    setFieldTexts(state.collab.ydoc, state.collab.yFields, syncTexts, state.collab.provider._localOrigin);
     for (const [fieldId, text] of Object.entries(restoredFields)) {
       const el = els[fieldId];
       if (!el) continue;

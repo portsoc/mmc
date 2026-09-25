@@ -7,6 +7,8 @@
 import {
   normalizeSection,
   itemsToPlainText,
+  itemsToSyncText,
+  syncLine,
   generateItemId,
   generateAssocId
 } from './item-migration.js';
@@ -968,7 +970,7 @@ export class RaggedLinksController {
 
   _notifyChange(fieldId, sectionEl) {
     const items = this.serializeSectionItems(sectionEl);
-    const rawText = itemsToPlainText(items);
+    const rawText = itemsToSyncText(items);
     if (this.onTextChange) {
       this.onTextChange(fieldId, items, rawText);
     }
@@ -985,7 +987,7 @@ export class RaggedLinksController {
     items.forEach(li => {
       const bullet = li.getAttribute('data-bullet') || DEFAULT_BULLET;
       const text = li.textContent || '';
-      lines.push(serializeLine(bullet, text));
+      lines.push(syncLine(bullet, text, li.getAttribute('data-assoc') || ''));
     });
     return lines.join('\n');
   }

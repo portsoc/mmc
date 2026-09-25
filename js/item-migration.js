@@ -168,6 +168,25 @@ export function itemsToPlainText(items) {
 }
 
 /**
+ * The line format shared through the live Yjs text. Like itemsToPlainText, but
+ * a linked item keeps its link as a leading "[assocId] " tag, which
+ * parseLegacyLine reads back, so links reach collaborators and survive reload.
+ */
+export function syncLine(bullet, text, assocId) {
+  const b = bullet || DEFAULT_BULLET;
+  const line = text ? `${b} ${text}` : b;
+  return assocId ? `[${assocId}] ${line}` : line;
+}
+
+export function itemsToSyncText(items) {
+  if (!Array.isArray(items) || items.length === 0) return '';
+  return items
+    .filter((item) => item && (item.text || item.bullet))
+    .map((item) => syncLine(item.bullet, item.text, item.assocId))
+    .join('\n');
+}
+
+/**
  * Normalizes an entire canvas document. Ensures both `items` and `fields` are
  * fully populated and in sync.
  */

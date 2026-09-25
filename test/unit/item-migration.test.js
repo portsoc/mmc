@@ -5,6 +5,7 @@ import {
   parseLegacyLine,
   normalizeSection,
   itemsToPlainText,
+  itemsToSyncText,
   normalizeCanvas,
   CANVAS_SECTIONS
 } from '../../js/item-migration.js';
@@ -109,6 +110,22 @@ describe('item-migration', () => {
       ];
       const text = itemsToPlainText(items);
       assert.equal(text, '⚫ First activity\n⚡ Second activity');
+    });
+  });
+
+  describe('itemsToSyncText', () => {
+    it('tags linked items so links survive a round trip through the shared text', () => {
+      const items = [
+        { bullet: '🟢', text: 'Coast Guard', assocId: 'assoc_ab12cd' },
+        { bullet: '⚫', text: 'Unlinked', assocId: '' }
+      ];
+      const text = itemsToSyncText(items);
+      assert.equal(text, '[assoc_ab12cd] 🟢 Coast Guard\n⚫ Unlinked');
+      const back = normalizeSection(text, 'kp');
+      assert.deepEqual(back.map((i) => [i.bullet, i.text, i.assocId]), [
+        ['🟢', 'Coast Guard', 'assoc_ab12cd'],
+        ['⚫', 'Unlinked', '']
+      ]);
     });
   });
 
