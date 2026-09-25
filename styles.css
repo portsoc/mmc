@@ -520,8 +520,10 @@ dialog button:focus-visible {
 }
 
 #focus-title {
+    flex: 1;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 0.5em;
     margin: 0;
 }
@@ -554,7 +556,15 @@ dialog button:focus-visible {
     font-size: 1.3em;
     line-height: 1.5;
     height: auto;
-    min-height: 100%;
+    /* Fill the slot as a flex item rather than min-height: 100%, which overflowed by the
+       first/last row margins collapsing through it and forced a scroll bar. */
+    flex: 1 0 auto;
+}
+
+/* The list fills the entry (min-height: 100%); flow-root keeps the first row's top margin
+   inside it instead of leaking out and overflowing by a few pixels. */
+#focus-slot .canvas-list {
+    display: flow-root;
 }
 
 /* Class display rules (e.g. .login-gate's flex) would otherwise beat the UA [hidden] style */

@@ -7,6 +7,12 @@ test('a section opens in the focus modal, is editable there, and returns on clos
   const modal = page.locator('#focus-modal');
   await expect(modal).toBeVisible();
   await expect(modal.locator('#ekp')).toBeVisible();
+  // A short entry fits without a scroll bar, and the section icon sits top right.
+  const slot = modal.locator('#focus-slot');
+  expect(await slot.evaluate(el => el.scrollHeight <= el.clientHeight)).toBe(true);
+  const icon = await modal.locator('#focus-title img').boundingBox();
+  const bar = await modal.locator('.focus-bar').boundingBox();
+  expect(icon.x + icon.width).toBeGreaterThan(bar.x + bar.width - 4);
   await page.keyboard.type('focused');
   await page.keyboard.press('Escape');
   await expect(modal).toBeHidden();
