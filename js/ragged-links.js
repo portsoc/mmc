@@ -32,6 +32,16 @@ import { pointerEventMethods } from './pointer-events.js';
 const RECENT_KEY = 'mmc-recent-bullets';
 const STYLES_KEY = 'mmc-bullet-styles';
 
+/** Named palette colours come from the stylesheet, which has light and dark
+ * variants; inline values would pin the light ones. Only custom colours go inline. */
+function setRowColours(li, colorName, bg, fg) {
+  const named = colorName && colorName !== 'clear';
+  if (bg && !named) li.style.setProperty('--row-bg', bg);
+  else li.style.removeProperty('--row-bg');
+  if (fg && !named) li.style.setProperty('--row-fg', fg);
+  else li.style.removeProperty('--row-fg');
+}
+
 /**
  * RaggedLinksController manages semantic unordered lists (<ul><li>),
  * CSS ::before emoji bullets, context popup, and unified pointer drag-to-associate.
@@ -368,16 +378,7 @@ export class RaggedLinksController {
     } else {
       li.removeAttribute('data-color');
     }
-    if (effectiveBg) {
-      li.style.setProperty('--row-bg', effectiveBg);
-    } else {
-      li.style.removeProperty('--row-bg');
-    }
-    if (effectiveFg) {
-      li.style.setProperty('--row-fg', effectiveFg);
-    } else {
-      li.style.removeProperty('--row-fg');
-    }
+    setRowColours(li, effectiveColor, effectiveBg, effectiveFg);
 
     return li;
   }
@@ -397,17 +398,7 @@ export class RaggedLinksController {
       li.removeAttribute('data-color');
     }
 
-    if (bg && bg !== 'transparent') {
-      li.style.setProperty('--row-bg', bg);
-    } else {
-      li.style.removeProperty('--row-bg');
-    }
-
-    if (fg && fg !== 'inherit') {
-      li.style.setProperty('--row-fg', fg);
-    } else {
-      li.style.removeProperty('--row-fg');
-    }
+    setRowColours(li, colorName, bg && bg !== 'transparent' ? bg : '', fg && fg !== 'inherit' ? fg : '');
 
     // Save association only for non-default bullets
     if (b !== DEFAULT_BULLET) {

@@ -66,10 +66,10 @@ export const pointerEventMethods = {
         touchDragAvatar = document.createElement('div');
         touchDragAvatar.className = 'touch-drag-avatar';
         touchDragAvatar.textContent = touchSourceLi.getAttribute('data-bullet') || DEFAULT_BULLET;
-        const bg = touchSourceLi.style.getPropertyValue('--row-bg') || '';
-        const fg = touchSourceLi.style.getPropertyValue('--row-fg') || '';
-        if (bg) touchDragAvatar.style.background = bg;
-        if (fg) touchDragAvatar.style.color = fg;
+        // Computed colours, so named palette colours (set in CSS) carry over too.
+        const { backgroundColor, color } = getComputedStyle(touchSourceLi);
+        touchDragAvatar.style.background = backgroundColor;
+        touchDragAvatar.style.color = color;
         document.body.appendChild(touchDragAvatar);
       }
 
@@ -168,10 +168,10 @@ export const pointerEventMethods = {
         mouseDragAvatar = document.createElement('div');
         mouseDragAvatar.className = 'touch-drag-avatar';
         mouseDragAvatar.textContent = mouseSourceLi.getAttribute('data-bullet') || DEFAULT_BULLET;
-        const bg = mouseSourceLi.style.getPropertyValue('--row-bg') || '';
-        const fg = mouseSourceLi.style.getPropertyValue('--row-fg') || '';
-        if (bg) mouseDragAvatar.style.background = bg;
-        if (fg) mouseDragAvatar.style.color = fg;
+        // Computed colours, so named palette colours (set in CSS) carry over too.
+        const { backgroundColor, color } = getComputedStyle(mouseSourceLi);
+        mouseDragAvatar.style.background = backgroundColor;
+        mouseDragAvatar.style.color = color;
         document.body.appendChild(mouseDragAvatar);
       }
 

@@ -1213,6 +1213,14 @@ a.app-menu-item {
     box-shadow: 0 0 8px color-mix(in srgb, var(--primary, #7C3AED) 45%, transparent);
 }
 
+/* Default bullet is an emoji, which ignores `color`, so swap it for dark mode. */
+@media (prefers-color-scheme: dark) {
+    .canvas-list li:not([data-bullet])::before,
+    .canvas-list li[data-bullet=""]::before {
+        content: '⚪';
+    }
+}
+
 /* Palette color bindings */
 .canvas-list li[data-color="emerald"], .canvas-list li[data-bullet="🟢"] { --row-bg: #D1FAE5; --row-fg: #047857; }
 .canvas-list li[data-color="violet"],  .canvas-list li[data-bullet="🟣"] { --row-bg: #EDE9FE; --row-fg: #6D28D9; }

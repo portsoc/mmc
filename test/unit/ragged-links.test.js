@@ -290,8 +290,9 @@ Third plain item
     assert.equal(li.getAttribute('data-bullet'), '🟢');
     assert.equal(li.getAttribute('data-color'), 'emerald');
     assert.equal(li.getAttribute('data-assoc'), 'assoc_green');
-    assert.equal(li.style.getPropertyValue('--row-bg'), '#D1FAE5');
-    assert.equal(li.style.getPropertyValue('--row-fg'), '#047857');
+    // Named colours are left to the stylesheet (which has dark-mode variants).
+    assert.equal(li.style.getPropertyValue('--row-bg'), '');
+    assert.equal(li.style.getPropertyValue('--row-fg'), '');
 
     delete globalThis.document;
   });
@@ -504,12 +505,12 @@ Third plain item
       // Both items must have updated bullet and color
       assert.equal(secKp.lis[0].getAttribute('data-bullet'), '⚡');
       assert.equal(secKp.lis[0].getAttribute('data-color'), 'azure');
-      assert.equal(secKp.lis[0].style.getPropertyValue('--row-bg'), '#E0F2FE');
+      assert.equal(secKp.lis[0].style.getPropertyValue('--row-bg'), '');
       assert.equal(secKp.lis[0].getAttribute('data-assoc'), 'assoc_shared');
 
       assert.equal(secVp.lis[0].getAttribute('data-bullet'), '⚡');
       assert.equal(secVp.lis[0].getAttribute('data-color'), 'azure');
-      assert.equal(secVp.lis[0].style.getPropertyValue('--row-bg'), '#E0F2FE');
+      assert.equal(secVp.lis[0].style.getPropertyValue('--row-bg'), '');
       assert.equal(secVp.lis[0].getAttribute('data-assoc'), 'assoc_shared');
 
       // Both sections kp and vp must be notified so they save to Firestore / Yjs
