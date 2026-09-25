@@ -29,9 +29,11 @@ function applyContributorHighlight(metrics) {
   for (const [fieldId, el] of Object.entries(elementsById())) {
     const host = barHost(el);
     if (!host) continue;
-    const gradient = contributorBarGradient(attribution[fieldId] || {}, colorForUser);
-    host.style.setProperty('--contrib-bar', gradient || 'none');
-    host.classList.toggle('contributor-highlighted', !!gradient);
+    // Sections with no recorded authors get a plain dark grey bar.
+    const gradient = contributorBarGradient(attribution[fieldId] || {}, colorForUser)
+      || 'linear-gradient(var(--darkgrey), var(--darkgrey))';
+    host.style.setProperty('--contrib-bar', gradient);
+    host.classList.add('contributor-highlighted');
   }
 }
 

@@ -87,7 +87,7 @@ test('contributors lists the person who typed', async ({ page }) => {
   await expect(page.locator('#metrics-leaderboard li')).toContainText('contrib');
 });
 
-test('the contributor setting draws a bar on edited sections only, not on the title', async ({ page }) => {
+test('the contributor setting bars every section (grey if unauthored), not the title', async ({ page }) => {
   await openNewCanvas(page, testEmail('contribbar'));
   await page.locator('#ekp').click();
   await page.keyboard.type('hello world');
@@ -100,8 +100,10 @@ test('the contributor setting draws a bar on edited sections only, not on the ti
   await expect(page.locator('#kp')).toHaveClass(/contributor-highlighted/);
   const bar = await page.locator('#kp').evaluate((el) => el.style.getPropertyValue('--contrib-bar'));
   expect(bar).toContain('0.00% 100.00%');
-  await expect(page.locator('#ka')).not.toHaveClass(/contributor-highlighted/);
-  await expect(page.locator('.contributor-highlighted')).toHaveCount(1);
+  const unauthored = await page.locator('#ka').evaluate((el) => el.style.getPropertyValue('--contrib-bar'));
+  expect(unauthored).toContain('--darkgrey');
+  await expect(page.locator('.contributor-highlighted')).toHaveCount(9);
+  await expect(page.locator('header .contributor-highlighted')).toHaveCount(0);
 });
 
 test('right-clicking a bullet opens the style popup, and a chosen colour survives reload', async ({ page }) => {
