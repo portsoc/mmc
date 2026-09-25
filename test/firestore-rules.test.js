@@ -35,6 +35,7 @@ beforeEach(async () => {
     await db.doc(`canvases/${CANVAS_ID}`).set({
       ownerId: 'owner1',
       roles: { owner1: 'owner', editor1: 'editor', viewer1: 'viewer' },
+      memberNames: { owner1: 'Olive', editor1: 'Ed', viewer1: 'Vi' },
       isPublicReadOnlyEnabled: true,
       readOnlyToken: 'tok_abc',
       fields: {}
@@ -81,6 +82,18 @@ describe('canvases security rules', () => {
     await assertSucceeds(
       editor.firestore().doc(`canvases/${CANVAS_ID}/versions/v1`).set({ name: 'x', fields: {} })
     );
+  });
+});
+
+describe('member names', () => {
+  it('owner cannot rename a collaborator', async () => {
+    const owner = testEnv.authenticatedContext('owner1');
+    await assertFails(owner.firestore().doc(`canvases/${CANVAS_ID}`).update({ 'memberNames.editor1': 'Mallory' }));
+  });
+
+  it('editor cannot rename themself', async () => {
+    const editor = testEnv.authenticatedContext('editor1');
+    await assertFails(editor.firestore().doc(`canvases/${CANVAS_ID}`).update({ 'memberNames.editor1': 'Boss' }));
   });
 });
 

@@ -24,3 +24,9 @@ exports.mirrorCanvasAccess = onDocumentWritten('canvases/{canvasId}', (event) =>
 
 exports.syncAccess = syncAccess;
 exports.accessFor = accessFor;
+
+// First word of the caller's Google name, for showing collaborators by name.
+exports.firstNameFromAuth = function firstNameFromAuth(auth) {
+  const full = auth?.token?.name || '';
+  return full.trim().split(/\s+/)[0] || auth?.token?.email?.split('@')[0] || 'Someone';
+};

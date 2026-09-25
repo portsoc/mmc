@@ -5,7 +5,7 @@ const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const { getDatabase } = require('firebase-admin/database');
 const { randomUUID } = require('crypto');
-const { syncAccess } = require('./access');
+const { syncAccess, firstNameFromAuth } = require('./access');
 
 const FIELD_IDS = ['title', 'by', 'kp', 'ka', 'vp', 'bs', 'be', 'kr', 'de', 'mb', 'if'];
 
@@ -27,6 +27,7 @@ exports.createCanvas = onCall(async (request) => {
     updatedAt: FieldValue.serverTimestamp(),
     lastSnapshotDate: null,
     roles: { [uid]: 'owner' },
+    memberNames: { [uid]: firstNameFromAuth(request.auth) },
     readOnlyToken,
     isPublicReadOnlyEnabled: true,
     fields: emptyFields

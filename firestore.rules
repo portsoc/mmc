@@ -33,6 +33,12 @@ service cloud.firestore {
         .hasAny(['ownerId', 'roles', 'binnedAt']);
     }
 
+    // Collaborators' names are written only by Cloud Functions, so nobody can
+    // relabel another member.
+    function changesMemberNames() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasAny(['memberNames']);
+    }
+
     match /users/{uid} {
       allow read: if isAuthenticated();
       allow write: if isAuthenticated() && request.auth.uid == uid;
@@ -44,8 +50,8 @@ service cloud.firestore {
       allow read: if isCanvasViewer(resource.data)
                   || (resource.data.isPublicReadOnlyEnabled == true && !inBin(resource.data));
       allow create: if isAuthenticated();
-      allow update: if isCanvasOwner(resource.data)
-                    || (isCanvasEditor(resource.data) && !inBin(resource.data) && !changesOwnerOnlyFields());
+      allow update: if !changesMemberNames() && (isCanvasOwner(resource.data)
+                    || (isCanvasEditor(resource.data) && !inBin(resource.data) && !changesOwnerOnlyFields()));
       // Deleting for good only happens from the bin (functions/canvases.js).
       allow delete: if isCanvasOwner(resource.data) && inBin(resource.data);
 

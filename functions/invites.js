@@ -4,7 +4,7 @@
 // role it doesn't have yet.
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
-const { syncAccess } = require('./access');
+const { syncAccess, firstNameFromAuth } = require('./access');
 
 exports.redeemInvite = onCall(async (request) => {
   const uid = request.auth?.uid;
@@ -34,6 +34,7 @@ exports.redeemInvite = onCall(async (request) => {
     tx.update(inviteRef, { status: 'accepted' });
     tx.update(canvasRef, {
       [`roles.${uid}`]: invite.role,
+      [`memberNames.${uid}`]: firstNameFromAuth(request.auth),
       updatedAt: FieldValue.serverTimestamp()
     });
 

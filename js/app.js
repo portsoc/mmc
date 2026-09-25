@@ -139,7 +139,8 @@ async function renderCollaboratorList() {
   const canvas = await getCanvas(state.canvasId);
   for (const [uid, role] of Object.entries(canvas?.roles || {})) {
     const item = document.createElement('li');
-    item.textContent = `${uid === currentUser.value?.uid ? 'You' : uid} — ${role}`;
+    const name = uid === currentUser.value?.uid ? 'You' : canvas.memberNames?.[uid] || 'Unnamed collaborator';
+    item.textContent = `${name} — ${role}`;
     list.appendChild(item);
   }
 
