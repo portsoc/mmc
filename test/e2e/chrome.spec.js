@@ -19,29 +19,36 @@ test('a section opens in the focus modal, is editable there, and returns on clos
   await expect(page.locator('#kp #ekp')).toContainText('focused');
 });
 
-test('focus view spreads rows out while they fit, and tightens instead of scrolling', async ({ page }) => {
+test('row spacing grows into spare room and tightens instead of overflowing', async ({ page }) => {
   await openNewCanvas(page, testEmail('rowgap'));
-  await page.locator('#kp h2 img').click();
-  // Opening runs inside a view transition, so the modal appears a frame later.
-  await expect(page.locator('#focus-modal')).toBeVisible();
-  const slot = page.locator('#focus-modal #focus-slot');
-  const gap = () => slot.evaluate(el => el.style.getPropertyValue('--focus-row-gap'));
-  const fits = () => slot.evaluate(el => el.scrollHeight <= el.clientHeight);
+  const gapOf = (sel) => page.locator(sel).evaluate(el =>
+    parseFloat(el.style.getPropertyValue('--row-gap')) / parseFloat(getComputedStyle(el).fontSize));
 
+  // Grid: a few rows in a roomy section get the full extra 1em.
+  await page.locator('#ekp').click();
   for (const line of ['one', 'two', 'three']) {
     await page.keyboard.type(line);
     await page.keyboard.press('Enter');
   }
-  expect(await gap()).toBe('1em');
+  await expect.poll(() => gapOf('#ekp .canvas-list')).toBeGreaterThan(0.9);
+
+  // Focus view: same, and it never scrolls just because of the spacing.
+  await page.locator('#kp h2 img').click();
+  await expect(page.locator('#focus-modal')).toBeVisible();
+  const slot = page.locator('#focus-modal #focus-slot');
+  const fits = () => slot.evaluate(el => el.scrollHeight <= el.clientHeight);
+  await expect.poll(() => gapOf('#focus-slot .canvas-list')).toBeGreaterThan(0.9);
   expect(await fits()).toBe(true);
 
   for (let i = 0; i < 25; i++) {
     await page.keyboard.type(`row ${i}`);
     await page.keyboard.press('Enter');
   }
-  expect(['0.75em', '0.5em', '0em']).toContain(await gap());
+  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+  const gap = await gapOf('#focus-slot .canvas-list');
+  expect(gap).toBeLessThan(1);
   // Either it fits with some extra spacing, or spacing is back to normal.
-  if (!(await fits())) expect(await gap()).toBe('0em');
+  if (!(await fits())) expect(gap).toBe(0);
 });
 
 test('shift-click defocuses a section and typing in it refocuses', async ({ page }) => {

@@ -592,9 +592,9 @@ dialog button:focus-visible {
     display: flow-root;
 }
 
-/* Extra space between rows in focus view; canvas-chrome.js widens it only while nothing scrolls. */
-#focus-slot .canvas-list li + li {
-    margin-top: calc(0.15em + var(--focus-row-gap, 0em));
+/* Extra space between rows, sized by row-spacing.js to the section's spare height. */
+.canvas-list li + li {
+    margin-top: calc(0.15em + var(--row-gap, 0px));
 }
 
 /* Class display rules (e.g. .login-gate's flex) would otherwise beat the UA [hidden] style */

@@ -1,5 +1,7 @@
 // Canvas chrome: section click/defocus, URL-fragment presentation,
 // Escape handling, the focus modal and the help dialog.
+
+import { initRowSpacing, scheduleRowSpacing } from './row-spacing.js';
 const el = {};
 const mmc = {
   current: []
@@ -159,6 +161,7 @@ export function initCanvasChrome() {
   const focusModal = document.querySelector('#focus-modal');
 
   handleFragment();
+  initRowSpacing();
 
   document.addEventListener('keydown', keyboardHandler);
 
@@ -273,17 +276,6 @@ function closeFocus({ animate = true } = {}) {
   else dialog.close();
 }
 
-/** Spread the focus view's rows out as far as possible (up to 1em extra)
- * without making it scroll; falls back to normal spacing when it's full. */
-const ROW_GAPS_EM = [1, 0.75, 0.5];
-function fitRowGap(slot) {
-  for (const gap of ROW_GAPS_EM) {
-    slot.style.setProperty('--focus-row-gap', `${gap}em`);
-    if (slot.scrollHeight <= slot.clientHeight) return;
-  }
-  slot.style.setProperty('--focus-row-gap', '0em');
-}
-
 /** Moves the section's own editable element into a focus dialog and
  * back on close, so sync/save listeners bound to it keep working. */
 function openFocus(gridItem) {
@@ -328,19 +320,15 @@ function showFocus(gridItem, editable, dialog) {
   editable.before(marker);
   const slot = document.querySelector('#focus-slot');
   slot.append(editable);
-  const refit = () => fitRowGap(slot);
-  editable.addEventListener('input', refit);
-  window.addEventListener('resize', refit);
   dialog.addEventListener('close', () => {
     focusedItem = null;
     dialog.style.transform = '';
     dialog.style.opacity = '';
-    editable.removeEventListener('input', refit);
-    window.removeEventListener('resize', refit);
     marker.replaceWith(editable);
+    scheduleRowSpacing();
   }, { once: true });
   dialog.showModal();
-  refit();
+  scheduleRowSpacing();
 
   // A <li> can't take focus itself; focus the editable list and put the
   // caret at the end of its last line, so typing goes straight in.
