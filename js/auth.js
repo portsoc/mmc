@@ -3,6 +3,7 @@ import { auth, db } from './firebase-config.js';
 import {
   GoogleAuthProvider,
   signInWithRedirect,
+  signInWithCredential,
   getRedirectResult,
   onAuthStateChanged,
   signOut
@@ -87,6 +88,13 @@ export async function initAuth() {
 export async function signInWithGoogle() {
   const provider = new GoogleAuthProvider();
   await signInWithRedirect(auth, provider);
+}
+
+// Browser tests (test/e2e) can't click through Google's page, so on localhost
+// only they sign in with a fake Google credential, which the Auth emulator accepts.
+if (['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+  window.__mmcTestSignIn = (email, name) => signInWithCredential(auth,
+    GoogleAuthProvider.credential(JSON.stringify({ sub: email, email, name, email_verified: true })));
 }
 
 export async function signOutUser() {
