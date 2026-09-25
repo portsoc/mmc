@@ -43,6 +43,7 @@ export function wireSettings() {
   const signoutBtn = document.getElementById('settings-signout');
   const highlight = document.getElementById('pref-highlight-contributors');
   const flash = document.getElementById('pref-flash-changes');
+  const dim = document.getElementById('pref-dim-unfocused');
   const speed = document.getElementById('pref-playback-speed');
 
   onUser((user) => {
@@ -54,6 +55,8 @@ export function wireSettings() {
 
   highlight.checked = prefs.highlightContributors;
   flash.checked = prefs.flashChanges;
+  dim.checked = prefs.dimUnfocused;
+  document.body.classList.toggle('dim-unfocused', prefs.dimUnfocused);
   speed.value = String(prefs.playbackSpeed);
 
   document.getElementById('settings-btn')?.addEventListener('click', () => modal.showModal());
@@ -66,6 +69,11 @@ export function wireSettings() {
     prefs.highlightContributors = highlight.checked;
     savePrefs();
     refreshContributorHighlight();
+  });
+  dim.addEventListener('change', () => {
+    prefs.dimUnfocused = dim.checked;
+    savePrefs();
+    document.body.classList.toggle('dim-unfocused', dim.checked);
   });
   flash.addEventListener('change', () => {
     prefs.flashChanges = flash.checked;

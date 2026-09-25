@@ -8,7 +8,7 @@ export const state = { canvasId: null, readOnly: false, isOwner: false, collab: 
 // Per-viewer display preferences (Settings dialog). Browser storage can be
 // unavailable, so every access is guarded and defaults always apply.
 const PREFS_KEY = 'mmc-prefs';
-export const prefs = { highlightContributors: false, flashChanges: true, playbackSpeed: 1 };
+export const prefs = { highlightContributors: false, dimUnfocused: false, flashChanges: true, playbackSpeed: 1 };
 try {
   Object.assign(prefs, JSON.parse(localStorage.getItem(PREFS_KEY) || '{}'));
 } catch { /* defaults */ }
