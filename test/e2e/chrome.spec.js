@@ -87,6 +87,23 @@ test('contributors lists the person who typed', async ({ page }) => {
   await expect(page.locator('#metrics-leaderboard li')).toContainText('contrib');
 });
 
+test('the contributor setting draws a bar on edited sections only, not on the title', async ({ page }) => {
+  await openNewCanvas(page, testEmail('contribbar'));
+  await page.locator('#ekp').click();
+  await page.keyboard.type('hello world');
+  await page.locator('#title').click();
+  await page.keyboard.type('named');
+  await page.waitForTimeout(5000); // edit credits flush 4s after typing pauses
+  await page.locator('#menu-btn').click();
+  await page.locator('#settings-btn').click();
+  await page.locator('#pref-highlight-contributors').check();
+  await expect(page.locator('#kp')).toHaveClass(/contributor-highlighted/);
+  const bar = await page.locator('#kp').evaluate((el) => el.style.getPropertyValue('--contrib-bar'));
+  expect(bar).toContain('0.00% 100.00%');
+  await expect(page.locator('#ka')).not.toHaveClass(/contributor-highlighted/);
+  await expect(page.locator('.contributor-highlighted')).toHaveCount(1);
+});
+
 test('right-clicking a bullet opens the style popup, and a chosen colour survives reload', async ({ page }) => {
   await openNewCanvas(page, testEmail('popup'));
   await page.locator('#ekp').click();

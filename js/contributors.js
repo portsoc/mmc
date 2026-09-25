@@ -6,22 +6,41 @@ import { recordEdit, getContributionMetrics } from './metrics.js';
 import { changedChars } from './text-diff.js';
 import { FIELD_ELEMENT_IDS, state, prefs, elementsById } from './app-state.js';
 
+// The bar spans a section's whole box; title and author get no bar.
+const barHost = (el) => el?.closest('.grid-item');
+
+/** Hard-stop gradient giving each contributor a width equal to their share. */
+export function contributorBarGradient(byUid, colorOf) {
+  const entries = Object.entries(byUid).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]);
+  const total = entries.reduce((sum, [, n]) => sum + n, 0);
+  if (!total) return '';
+  let start = 0;
+  const stops = entries.map(([uid, n]) => {
+    const end = start + (n / total) * 100;
+    const stop = `${colorOf(uid)} ${start.toFixed(2)}% ${end.toFixed(2)}%`;
+    start = end;
+    return stop;
+  });
+  return `linear-gradient(90deg, ${stops.join(', ')})`;
+}
+
 function applyContributorHighlight(metrics) {
-  const els = elementsById();
   const attribution = metrics?.fieldAttribution || {};
-  for (const [fieldId, el] of Object.entries(els)) {
-    if (!el) continue;
-    const byUid = attribution[fieldId] || {};
-    const topUid = Object.keys(byUid).sort((a, b) => byUid[b] - byUid[a])[0];
-    el.style.borderLeftColor = topUid ? colorForUser(topUid) : '';
-    el.classList.toggle('contributor-highlighted', !!topUid);
+  for (const [fieldId, el] of Object.entries(elementsById())) {
+    const host = barHost(el);
+    if (!host) continue;
+    const gradient = contributorBarGradient(attribution[fieldId] || {}, colorForUser);
+    host.style.setProperty('--contrib-bar', gradient || 'none');
+    host.classList.toggle('contributor-highlighted', !!gradient);
   }
 }
 
 function clearContributorHighlight() {
   for (const el of Object.values(elementsById())) {
-    el?.classList.remove('contributor-highlighted');
-    if (el) el.style.borderLeftColor = '';
+    const host = barHost(el);
+    if (!host) continue;
+    host.classList.remove('contributor-highlighted');
+    host.style.removeProperty('--contrib-bar');
   }
 }
 
