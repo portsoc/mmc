@@ -235,7 +235,7 @@ export function initCanvasChrome() {
 /** Runs `update` inside a view transition that morphs the section box,
  * heading and text between the grid and the focus view. Falls back to a
  * plain update without View Transitions support or with reduced motion. */
-const VT_NAMES = { box: 'mmc-focus-box', head: 'mmc-focus-head', text: 'mmc-focus-text' };
+const VT_NAMES = { box: 'mmc-focus-box', head: 'mmc-focus-head', icon: 'mmc-focus-icon', text: 'mmc-focus-text' };
 function withFocusTransition(gridItem, opening, update) {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!document.startViewTransition || reduce || !gridItem) {
@@ -249,6 +249,10 @@ function withFocusTransition(gridItem, opening, update) {
   const name = ([box, head], on) => {
     box.style.viewTransitionName = on ? VT_NAMES.box : '';
     head.style.viewTransitionName = on ? VT_NAMES.head : '';
+    // The icon sits at different ends of the heading in the grid and the
+    // modal, so it needs its own name to travel rather than fade in place.
+    const icon = head.querySelector('img');
+    if (icon) icon.style.viewTransitionName = on ? VT_NAMES.icon : '';
   };
   // The editable is the same element in both states, so it keeps its name.
   if (editable) editable.style.viewTransitionName = VT_NAMES.text;

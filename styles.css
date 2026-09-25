@@ -544,6 +544,7 @@ dialog button:focus-visible {
    (names are set from canvas-chrome.js only for the transition). */
 ::view-transition-group(mmc-focus-box),
 ::view-transition-group(mmc-focus-head),
+::view-transition-group(mmc-focus-icon),
 ::view-transition-group(mmc-focus-text),
 ::view-transition-group(root) {
     animation-duration: 420ms;
