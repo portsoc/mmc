@@ -28,3 +28,29 @@ test('help opens from the menu', async ({ page }) => {
   await page.locator('#help').click();
   await expect(page.locator('#usage')).toBeVisible();
 });
+
+test('a named version appears in history, is shown read-only, and closing returns to live text', async ({ page }) => {
+  await openNewCanvas(page, testEmail('history'));
+  await page.locator('#ekp').click();
+  await page.keyboard.type('before');
+  await page.locator('#menu-btn').click();
+  await page.locator('#name-version-btn').click();
+  await page.locator('#name-version-modal input').first().fill('V1');
+  await page.locator('#name-version-save').click();
+  await expect(page.locator('#name-version-modal')).toBeHidden();
+
+  await page.locator('#ekp').click();
+  await page.keyboard.type(' after');
+  await page.locator('#menu-btn').click();
+  await page.locator('#history-btn').click();
+  const dock = page.locator('#history-dock');
+  await expect(dock).toBeVisible();
+  await dock.locator('li', { hasText: 'V1' }).click();
+  await expect(page.locator('#ekp')).toHaveAttribute('contenteditable', 'false');
+  await expect(page.locator('#ekp')).not.toContainText('after');
+
+  await page.locator('#history-exit').click();
+  await expect(dock).toBeHidden();
+  await expect(page.locator('#ekp')).toContainText('before after');
+  await expect(page.locator('#ekp')).toHaveAttribute('contenteditable', 'plaintext-only');
+});
