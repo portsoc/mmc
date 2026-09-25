@@ -40,12 +40,12 @@
 </main>
 <p id="bin-notice" class="bin-notice" role="status" hidden><span id="bin-notice-text">This canvas is in the bin, so it can't be changed.</span> <button id="bin-notice-restore" type="button" class="link-btn" hidden>Restore it</button></p>
 
-<div id="app-root" class="grid-container" data-loading aria-busy="true">
+<div id="app-root" class="grid-container" role="main" aria-label="Mission Model Canvas" data-loading aria-busy="true">
 
-    <header>
+    <header role="none">
         <div class="title-block">
-            <h1><span id="title" contenteditable data-placeholder="title"></span></h1>
-            <p id="by" class="author" contenteditable data-placeholder="team" aria-label="Team name"></p>
+            <h1><span id="title" contenteditable role="textbox" aria-label="Canvas title" data-placeholder="title"></span></h1>
+            <p id="by" class="author" contenteditable role="textbox" aria-label="Team name" data-placeholder="team"></p>
         </div>
         <div id="collab-toolbar" class="collab-toolbar">
             <div id="sync-status" class="sync-status" aria-live="polite" role="status" title="Sync status"></div>
@@ -96,15 +96,15 @@
         </div>
     </header>
 
-    <div class="grid-item" id="kp"><h2 id="hkp">Key Partners <img aria-labelledby="hkp" src="/i/kp.svg"></h2><section id="ekp" class="e" contenteditable="plaintext-only"></section></div>
-    <div class="grid-item" id="ka"><h2 id="hka">Key Activities <img aria-labelledby="hka" src="/i/ka.svg"></h2><section id="eka" class="e" contenteditable="plaintext-only"></section></div>
-    <div class="grid-item" id="vp"><h2 id="hvp">Value Propositions <img aria-labelledby="hvp" src="/i/vp.svg"></h2><section id="evp" class="e" contenteditable="plaintext-only"></section></div>
-    <div class="grid-item" id="bs"><h2 id="hbs">Buy-in Support <img aria-labelledby="hbs" src="/i/bs.svg"></h2><section id="ebs" class="e" contenteditable="plaintext-only"></section></div>
-    <div class="grid-item" id="be"><h2 id="hbe">Beneficiaries <img aria-labelledby="hbe" src="/i/be.svg"></h2><section id="ebe" class="e" contenteditable="plaintext-only"></section></div>
-    <div class="grid-item" id="kr"><h2 id="hkr">Key Resources <img aria-labelledby="hkr" src="/i/kr.svg"></h2><section id="ekr" class="e" contenteditable="plaintext-only"></section></div>
-    <div class="grid-item" id="de"><h2 id="hde">Deployment <img aria-labelledby="hde" src="/i/de.svg"></h2><section id="ede" class="e" contenteditable="plaintext-only"></section></div>
-    <div class="grid-item" id="mb"><h2 id="hmb">Mission Budget/Cost <img aria-labelledby="hmb" src="/i/mb.svg"></h2><section id="emb" class="e" contenteditable="plaintext-only"></section></div>
-    <div class="grid-item" id="if"><h2 id="hif">Mission Achievement/Impact Factors <img aria-labelledby="hif" src="/i/if.svg"></h2><section id="eif" class="e" contenteditable="plaintext-only"></section></div>
+    <div class="grid-item" id="kp"><h2 id="hkp">Key Partners <img src="/i/kp.svg"></h2><section id="ekp" class="e" contenteditable="plaintext-only" aria-labelledby="hkp"></section></div>
+    <div class="grid-item" id="ka"><h2 id="hka">Key Activities <img src="/i/ka.svg"></h2><section id="eka" class="e" contenteditable="plaintext-only" aria-labelledby="hka"></section></div>
+    <div class="grid-item" id="vp"><h2 id="hvp">Value Propositions <img src="/i/vp.svg"></h2><section id="evp" class="e" contenteditable="plaintext-only" aria-labelledby="hvp"></section></div>
+    <div class="grid-item" id="bs"><h2 id="hbs">Buy-in Support <img src="/i/bs.svg"></h2><section id="ebs" class="e" contenteditable="plaintext-only" aria-labelledby="hbs"></section></div>
+    <div class="grid-item" id="be"><h2 id="hbe">Beneficiaries <img src="/i/be.svg"></h2><section id="ebe" class="e" contenteditable="plaintext-only" aria-labelledby="hbe"></section></div>
+    <div class="grid-item" id="kr"><h2 id="hkr">Key Resources <img src="/i/kr.svg"></h2><section id="ekr" class="e" contenteditable="plaintext-only" aria-labelledby="hkr"></section></div>
+    <div class="grid-item" id="de"><h2 id="hde">Deployment <img src="/i/de.svg"></h2><section id="ede" class="e" contenteditable="plaintext-only" aria-labelledby="hde"></section></div>
+    <div class="grid-item" id="mb"><h2 id="hmb">Mission Budget/Cost <img src="/i/mb.svg"></h2><section id="emb" class="e" contenteditable="plaintext-only" aria-labelledby="hmb"></section></div>
+    <div class="grid-item" id="if"><h2 id="hif">Mission Achievement/Impact Factors <img src="/i/if.svg"></h2><section id="eif" class="e" contenteditable="plaintext-only" aria-labelledby="hif"></section></div>
 </div>
 
 <dialog id="focus-modal" aria-labelledby="focus-title">
