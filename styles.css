@@ -347,10 +347,6 @@ h2 img:hover {
     box-shadow: inset 0 0 0 .125em var(--outline);
 }
 
-.lo {
-    opacity: 0.5
-}
-
 .grid-item:has(*:focus) {
     box-shadow: inset 0 0 0 .125em var(--outline);
 }

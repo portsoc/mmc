@@ -1,5 +1,4 @@
-// Canvas chrome: section click/defocus, URL-fragment presentation,
-// Escape handling, the focus modal and the help dialog.
+// Canvas chrome: section click-to-edit, Escape handling, the focus modal and the help dialog.
 
 import { initRowSpacing, scheduleRowSpacing } from './row-spacing.js';
 const el = {};
@@ -7,14 +6,8 @@ const mmc = {
   current: []
 };
 
-function toggleItem(event) {
+function focusSectionOnClick(event) {
   const gridItem = event.target.closest('.grid-item');
-  if (event.metaKey || event.shiftKey) {
-    event.preventDefault();
-    gridItem?.classList.toggle('lo');
-    updateURL();
-    return;
-  }
 
   // Normal clicks: NEVER preventDefault! Allow native caret placement and editing.
   if (event.target.isContentEditable || event.target.closest('[contenteditable="true"]') || event.target.closest('li')) {
@@ -46,43 +39,6 @@ function toggleItem(event) {
   }
 }
 
-function updateURL() {
-  const inverseIds = [];
-  for (const element of document.querySelectorAll('.grid-item')) {
-    if (!element.classList.contains('lo')) {
-      inverseIds.push(element.id);
-    }
-  }
-  let fragment = ''
-  if (inverseIds.length > 0 && inverseIds.length < 9  ) {
-    fragment = inverseIds.join('-');
-  }
-  setFragment(fragment);
-}
-
-function setFragment(fragment) {
-  const url = `${window.location.pathname}${window.location.search}#${fragment}`;
-  window.history.replaceState(null, null, url);
-}
-
-function handleFragment() {
-  const fragment = window.location.hash.slice(1);
-  if (fragment) {
-    const ids = fragment.split('-');
-    for (const id of ids) {
-      const element = document.getElementById(id);
-      if (element) {
-        element.classList.remove('lo');
-      }
-    }
-    for (const element of document.querySelectorAll('.grid-item')) {
-      if (!ids.includes(element.id)) {
-        element.classList.add('lo');
-      }
-    }
-  }
-}
-
 function keyboardHandler(event) {
   if (event.key === 'Escape') {
     const focusModal = document.querySelector('#focus-modal');
@@ -92,12 +48,6 @@ function keyboardHandler(event) {
       return;
     }
     document.activeElement.blur();
-  }
-  const gridItem = event.target.closest('.grid-item');
-  if (gridItem) {
-    if (gridItem.classList.contains('lo')) {
-      gridItem.classList.remove('lo');
-    }
   }
 }
 
@@ -160,13 +110,12 @@ export function initCanvasChrome() {
   el.help = document.querySelector('#help');
   const focusModal = document.querySelector('#focus-modal');
 
-  handleFragment();
   initRowSpacing();
 
   document.addEventListener('keydown', keyboardHandler);
 
   for (const item of el.gridItems) {
-    item.addEventListener('click', toggleItem);
+    item.addEventListener('click', focusSectionOnClick);
 
     // Tapping the panel icon opens/toggles the focus view
     const icon = item.querySelector('h2 img');

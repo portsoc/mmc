@@ -51,15 +51,6 @@ test('row spacing grows into spare room and tightens instead of overflowing', as
   if (!(await fits())) expect(gap).toBe(0);
 });
 
-test('shift-click defocuses a section and typing in it refocuses', async ({ page }) => {
-  await openNewCanvas(page, testEmail('defocus'));
-  await page.locator('#ka h2').click({ modifiers: ['Shift'] });
-  await expect(page.locator('#ka')).toHaveClass(/\blo\b/);
-  await page.locator('#eka').click();
-  await page.keyboard.type('x');
-  await expect(page.locator('#ka')).not.toHaveClass(/\blo\b/);
-});
-
 test('help opens from the menu', async ({ page }) => {
   await openNewCanvas(page, testEmail('help'));
   await page.locator('#menu-btn').click();
