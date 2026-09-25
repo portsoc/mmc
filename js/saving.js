@@ -4,6 +4,7 @@
 import { updateField, updateSectionItems } from './canvas-data.js';
 import { itemsFromY } from './collab.js';
 import { state } from './app-state.js';
+import { syncFeedback } from './feedback.js';
 
 const SAVE_DELAY_MS = 2000;
 const pendingSaves = new Map(); // fieldId -> fallback value if there is no live doc
@@ -11,6 +12,7 @@ let saveTimer = null;
 
 export function scheduleSave(fieldId, fallback) {
   pendingSaves.set(fieldId, fallback);
+  syncFeedback.markPending();
   clearTimeout(saveTimer);
   saveTimer = setTimeout(flushSaves, SAVE_DELAY_MS);
 }
@@ -18,7 +20,11 @@ export function scheduleSave(fieldId, fallback) {
 export function flushSaves() {
   clearTimeout(saveTimer);
   saveTimer = null;
-  if (!state.canvasId || state.readOnly) return pendingSaves.clear();
+  if (!state.canvasId || state.readOnly) {
+    pendingSaves.clear();
+    syncFeedback.pendingEdits = false;
+    return syncFeedback.render();
+  }
   for (const [fieldId, fallback] of pendingSaves) {
     const yarr = state.collab?.yItems?.[fieldId];
     const ytext = state.collab?.yFields?.[fieldId];
@@ -33,4 +39,13 @@ export function flushSaves() {
 addEventListener('pagehide', flushSaves);
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') flushSaves();
+});
+
+// Warn before leaving while edits haven't reached the server yet.
+addEventListener('beforeunload', (e) => {
+  if (!state.canvasId || state.readOnly) return;
+  if (pendingSaves.size || syncFeedback.inFlightSaves > 0 || !syncFeedback.isOnline) {
+    flushSaves();
+    e.preventDefault();
+  }
 });

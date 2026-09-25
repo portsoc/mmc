@@ -89,6 +89,22 @@ describe('SyncFeedbackManager — Real-time Sync Status', () => {
     assert.equal(mockEl.className, 'sync-status sync-synced');
   });
 
+  it('does not claim saved while an edit is waiting to be saved', () => {
+    manager.markPending();
+    assert.equal(manager.state, 'saving');
+    manager.startSave();
+    manager.finishSave();
+    assert.equal(manager.state, 'synced');
+  });
+
+  it('shows reconnecting when the live connection drops while online', () => {
+    manager.setRtdbConnected(false);
+    assert.equal(manager.state, 'reconnecting');
+    assert.ok(mockEl.innerHTML.includes('Reconnecting'));
+    manager.setRtdbConnected(true);
+    assert.equal(manager.state, 'synced');
+  });
+
   it('triggers onStatusClick callback when status badge is clicked', () => {
     let clickedState = null;
     let clickedError = null;

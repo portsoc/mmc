@@ -11,8 +11,8 @@ function getNavigatorOnline() {
 export class SyncFeedbackManager {
   constructor(options = {}) {
     this.statusEl = null;
-    this.state = 'synced'; // 'synced' | 'saving' | 'offline' | 'error'
     this.inFlightSaves = 0;
+    this.pendingEdits = false; // edited, but the save hasn't started yet
     this.isOnline = getNavigatorOnline();
     this.isRtdbConnected = true;
     this.lastError = null;
@@ -21,6 +21,17 @@ export class SyncFeedbackManager {
     if (options.autoInit !== false && typeof window !== 'undefined') {
       this.initNetworkListeners();
     }
+  }
+
+  // Derived from the facts every time, so it can't claim "Saved" while
+  // edits are waiting or the live connection is down.
+  // 'synced' | 'saving' | 'reconnecting' | 'offline' | 'error'
+  get state() {
+    if (!this.isOnline) return 'offline';
+    if (this.lastError) return 'error';
+    if (!this.isRtdbConnected) return 'reconnecting';
+    if (this.pendingEdits || this.inFlightSaves > 0) return 'saving';
+    return 'synced';
   }
 
   bindElement(el) {
@@ -37,104 +48,70 @@ export class SyncFeedbackManager {
 
   initNetworkListeners() {
     if (typeof window === 'undefined') return;
-
-    window.addEventListener('online', () => {
-      this.setOnline(true);
-    });
-
-    window.addEventListener('offline', () => {
-      this.setOnline(false);
-    });
+    window.addEventListener('online', () => this.setOnline(true));
+    window.addEventListener('offline', () => this.setOnline(false));
   }
 
   setOnline(online) {
-    const wasOnline = this.isOnline;
     this.isOnline = Boolean(online);
-
-    if (!this.isOnline) {
-      this.state = 'offline';
-    } else if (!wasOnline) {
-      // Transitioning from offline to online
-      if (this.inFlightSaves > 0) {
-        this.state = 'saving';
-      } else {
-        this.state = 'synced';
-      }
-    }
     this.render();
   }
 
   setRtdbConnected(connected) {
     this.isRtdbConnected = Boolean(connected);
-    if (!this.isRtdbConnected && this.isOnline) {
-      // Browser says online, but socket is currently disconnected
-      // We can indicate reconnecting if we aren't already saving/offline/error
-    }
+    this.render();
+  }
+
+  markPending() {
+    this.pendingEdits = true;
     this.render();
   }
 
   startSave() {
+    this.pendingEdits = false;
     this.inFlightSaves += 1;
-    if (this.isOnline) {
-      this.state = 'saving';
-      this.lastError = null;
-    } else {
-      this.state = 'offline';
-    }
+    this.lastError = null;
     this.render();
   }
 
   finishSave() {
     this.inFlightSaves = Math.max(0, this.inFlightSaves - 1);
-    if (!this.isOnline) {
-      this.state = 'offline';
-    } else if (this.inFlightSaves === 0 && this.state === 'saving') {
-      this.state = 'synced';
-      this.lastError = null;
-    }
     this.render();
   }
 
   failSave(error) {
     this.inFlightSaves = Math.max(0, this.inFlightSaves - 1);
     this.lastError = error;
-    if (!this.isOnline) {
-      this.state = 'offline';
-    } else {
-      this.state = 'error';
-    }
     this.render();
   }
 
   clearError() {
     this.lastError = null;
-    if (!this.isOnline) {
-      this.state = 'offline';
-    } else if (this.inFlightSaves > 0) {
-      this.state = 'saving';
-    } else {
-      this.state = 'synced';
-    }
     this.render();
   }
 
   render() {
     if (!this.statusEl) return;
 
-    this.statusEl.className = `sync-status sync-${this.state}`;
-    this.statusEl.setAttribute('data-state', this.state);
+    const state = this.state;
+    this.statusEl.className = `sync-status sync-${state}`;
+    this.statusEl.setAttribute('data-state', state);
 
     let html = '';
     let title = '';
 
-    switch (this.state) {
+    switch (state) {
       case 'saving':
         html = `<span class="sync-dot saving" aria-hidden="true"></span><span class="sync-label">Saving…</span>`;
-        title = 'Saving changes to cloud…';
+        title = 'Saving your changes…';
         break;
       case 'offline':
-        html = `<svg class="sync-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 1l22 22M16.5 16.5H5a4 4 0 0 1 0-8c.4 0 .8.1 1.2.2a6 6 0 0 1 10.3 2.3M19.4 14.5A4.5 4.5 0 0 0 19 9a5 5 0 0 0-4-2.8"/></svg><span class="sync-label">Offline (saved locally)</span>`;
-        title = 'You are currently offline. Edits are safely buffered in local storage.';
+        html = `<svg class="sync-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 1l22 22M16.5 16.5H5a4 4 0 0 1 0-8c.4 0 .8.1 1.2.2a6 6 0 0 1 10.3 2.3M19.4 14.5A4.5 4.5 0 0 0 19 9a5 5 0 0 0-4-2.8"/></svg><span class="sync-label">Offline</span>`;
+        title = 'You are offline. Your edits will sync when you reconnect — keep this tab open until then.';
+        break;
+      case 'reconnecting':
+        html = `<span class="sync-dot saving" aria-hidden="true"></span><span class="sync-label">Reconnecting…</span>`;
+        title = 'Lost the live connection. Your edits will sync when it comes back — keep this tab open.';
         break;
       case 'error':
         html = `<svg class="sync-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 8v4m0 4v.01M10.3 2.8l-8.6 15A2 2 0 0 0 3.4 21h17.2a2 2 0 0 0 1.7-3.2l-8.6-15a2 2 0 0 0-3.4 0z"/></svg><span class="sync-label">Sync error</span>`;
