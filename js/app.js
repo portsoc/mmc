@@ -175,15 +175,15 @@ function wireFeedback() {
   });
 
   window.addEventListener('offline', () => {
-    toastManager.warning('You are offline. Edits are safely buffered in local storage.', { duration: 5000 });
+    toastManager.warning("You're offline. Keep this tab open — your edits will sync when you reconnect.", { duration: 6000 });
   });
 
   window.addEventListener('online', () => {
-    toastManager.success('Back online. Synchronizing changes with cloud…', { duration: 4000 });
+    toastManager.success('Back online. Syncing your changes…', { duration: 4000 });
   });
 
   errorReporter.addListener((entry) => {
-    if (entry.count === 1 && (entry.type === 'firestore_write' || entry.type === 'rtdb_push' || entry.type === 'window_error')) {
+    if (entry.count === 1 && (entry.type === 'rtdb_push' || entry.type === 'window_error')) {
       toastManager.error(`Sync warning: ${entry.message}`, {
         duration: 7000,
         action: { label: 'Diagnostics', onClick: openDiagnostics }
