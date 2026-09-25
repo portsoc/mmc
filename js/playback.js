@@ -9,11 +9,12 @@ const SPEED_MS = { 1: 1200, 2: 600, 5: 250 };
 
 export class PlaybackController {
   /** getLiveFields() returns the current canvas text, shown at liveIndex. */
-  constructor(canvasId, elementsById, getLiveFields, raggedLinks = null) {
+  constructor(canvasId, elementsById, getLiveFields, raggedLinks = null, getLiveItems = null) {
     this.canvasId = canvasId;
     this.elementsById = elementsById;
     this.getLiveFields = getLiveFields;
     this.raggedLinks = raggedLinks;
+    this.getLiveItems = getLiveItems;
     this.versions = [];
     this.currentIndex = 0;
     this.speed = 1;
@@ -44,6 +45,7 @@ export class PlaybackController {
   render(index) {
     const version = this.versionAt(index);
     const fields = version ? version.fields : this.getLiveFields();
+    const items = version ? version.items : this.getLiveItems?.();
     for (const fieldId of FIELD_IDS) {
       const el = this.elementsById[fieldId];
       if (!el) continue;
@@ -58,8 +60,8 @@ export class PlaybackController {
         const current = this.raggedLinks ? this.raggedLinks.serializeSection(el) : el.textContent;
         if (current !== formatted) {
           if (this.raggedLinks) {
-            if (version?.items?.[fieldId]) {
-              this.raggedLinks.setSectionItems(el, version.items[fieldId]);
+            if (items?.[fieldId]) {
+              this.raggedLinks.setSectionItems(el, items[fieldId]);
             } else {
               this.raggedLinks.setSectionText(el, formatted);
             }

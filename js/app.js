@@ -26,15 +26,14 @@ import {
   inviteUrlFor,
   setPublicReadOnly
 } from './canvas-data.js';
-import { bindCollaborativeFields, colorForUser, setDomSyncPaused, setFieldTexts } from './collab.js';
-import { applyTextDiff } from './text-diff.js';
+import { applyLocalItems, bindCollaborativeFields, colorForUser, itemsFromY, setDomSyncPaused, setFieldTexts } from './collab.js';
 import { createWaypoint, maybeCreateDailySnapshot, restoreVersion } from './versions.js';
 import { recordEdit, getContributionMetrics } from './metrics.js';
 import { PlaybackController } from './playback.js';
 import { canEdit, isOwner } from './roles.js';
 import { showCanvasList, showCanvasListSkeleton, showCanvasListError } from './canvas-list.js';
 import { RaggedLinksController } from './ragged-links.js';
-import { normalizeCanvas, itemsToSyncText } from './item-migration.js';
+import { normalizeCanvas, itemsToPlainText } from './item-migration.js';
 import { PanelFocusManager, CANVAS_PANELS } from './panel-focus.js';
 import { errorReporter } from './error-reporter.js';
 import { syncFeedback, toastManager } from './feedback.js';
@@ -434,10 +433,18 @@ function wireHistory() {
   const els = elementsById();
   let controller = null;
   let liveSnapshot = null; // read-only views have no shared doc to read live text from
+  let liveItemsSnapshot = null;
+
+  function liveItems() {
+    if (!state.collab) return liveItemsSnapshot;
+    return Object.fromEntries(Object.entries(state.collab.yItems).map(([f, yarr]) => [f, itemsFromY(yarr)]));
+  }
 
   function liveFields() {
     if (!state.collab) return liveSnapshot;
-    return Object.fromEntries(Object.entries(state.collab.yFields).map(([f, ytext]) => [f, ytext.toString()]));
+    const fields = Object.fromEntries(Object.entries(state.collab.yFields).map(([f, ytext]) => [f, ytext.toString()]));
+    for (const [f, items] of Object.entries(liveItems())) fields[f] = itemsToPlainText(items);
+    return fields;
   }
 
   function setEditable(editable) {
@@ -495,7 +502,11 @@ function wireHistory() {
       f,
       ['title', 'by'].includes(f) ? (el?.textContent ?? '') : (state.raggedLinks?.serializeSection(el) ?? (el?.textContent ?? ''))
     ]));
-    controller = new PlaybackController(state.canvasId, els, liveFields, state.raggedLinks);
+    liveItemsSnapshot = state.raggedLinks
+      ? Object.fromEntries(Object.entries(els).filter(([f]) => !['title', 'by'].includes(f))
+        .map(([f, el]) => [f, state.raggedLinks.serializeSectionItems(el)]))
+      : null;
+    controller = new PlaybackController(state.canvasId, els, liveFields, state.raggedLinks, liveItems);
     controller.onStep = onStep;
     controller.onPlayingChange = (playing) => {
       playBtn.hidden = playing;
@@ -545,11 +556,8 @@ function wireHistory() {
     const restored = await restoreVersion(state.canvasId, version.id, currentUser.value);
     const restoredFields = restored?.fields || version.fields;
     const restoredItems = restored?.items || version.items;
-    const syncTexts = Object.fromEntries(Object.entries(restoredFields).map(([fieldId, text]) => [
-      fieldId,
-      restoredItems?.[fieldId] ? itemsToSyncText(restoredItems[fieldId]) : text
-    ]));
-    setFieldTexts(state.collab.ydoc, state.collab.yFields, syncTexts, state.collab.provider._localOrigin);
+    const headerTexts = Object.fromEntries(Object.entries(restoredFields).filter(([f]) => ['title', 'by'].includes(f)));
+    setFieldTexts(state.collab.ydoc, state.collab.yFields, headerTexts, state.collab.provider._localOrigin);
     for (const [fieldId, text] of Object.entries(restoredFields)) {
       const el = els[fieldId];
       if (!el) continue;
@@ -561,6 +569,7 @@ function wireHistory() {
         } else {
           state.raggedLinks.setSectionText(el, text);
         }
+        applyLocalItems(state.collab, fieldId, state.raggedLinks.serializeSectionItems(el));
       }
     }
     close();
@@ -583,9 +592,7 @@ function initRaggedLinks(els) {
       updateSectionItems(state.canvasId, fieldId, items).catch((err) => {
         console.warn('[app] updateSectionItems failed:', err);
       });
-      if (state.collab?.yFields?.[fieldId]) {
-        applyTextDiff(state.collab.yFields[fieldId], newText, state.collab.provider._localOrigin);
-      }
+      applyLocalItems(state.collab, fieldId, items);
       if (currentUser.value) {
         recordEdit(state.canvasId, fieldId, currentUser.value.uid, firstName(currentUser.value), newText.length);
       }
@@ -855,7 +862,7 @@ async function init() {
     doneLoading();
   } else {
     try {
-      state.collab = await bindCollaborativeFields(state.canvasId, els, normalizedCanvas.fields, (fieldId, remoteValue) => {
+      state.collab = await bindCollaborativeFields(state.canvasId, els, normalizedCanvas.fields, normalizedCanvas.items, (fieldId, remoteValue) => {
         if (['title', 'by'].includes(fieldId)) {
           const el = els[fieldId];
           if (el && el.textContent !== remoteValue) {
@@ -864,7 +871,7 @@ async function init() {
         } else if (state.raggedLinks) {
           const el = els[fieldId];
           if (el) {
-            state.raggedLinks.setSectionText(el, remoteValue);
+            state.raggedLinks.setSectionItems(el, remoteValue);
           }
         }
       });
@@ -873,12 +880,15 @@ async function init() {
         // If Yjs already had history from an active peer in RTDB that differs from canvas.fields, sync it to DOM
         for (const [fieldId, ytext] of Object.entries(state.collab.yFields)) {
           const val = ytext.toString();
-          if (val && val !== (normalizedCanvas.fields?.[fieldId] ?? '')) {
-            if (['title', 'by'].includes(fieldId)) {
-              if (els[fieldId]) els[fieldId].textContent = val;
-            } else if (state.raggedLinks && els[fieldId]) {
-              state.raggedLinks.setSectionText(els[fieldId], val);
-            }
+          if (val && val !== (normalizedCanvas.fields?.[fieldId] ?? '') && els[fieldId]) {
+            els[fieldId].textContent = val;
+          }
+        }
+        for (const [fieldId, yarr] of Object.entries(state.collab.yItems)) {
+          const live = itemsFromY(yarr);
+          if (live.length && state.raggedLinks && els[fieldId]
+            && JSON.stringify(live) !== JSON.stringify(state.raggedLinks.serializeSectionItems(els[fieldId]))) {
+            state.raggedLinks.setSectionItems(els[fieldId], live);
           }
         }
 

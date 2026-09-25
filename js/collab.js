@@ -10,6 +10,7 @@ import { ref, onValue, push, onDisconnect, set as rtdbSet } from 'https://www.gs
 import { FIELD_IDS } from './canvas-data.js';
 import { errorReporter } from './error-reporter.js';
 import { applyTextDiff } from './text-diff.js';
+import { applyItemsToY, itemsFromY, itemsKey, seedItemsUpdate, seedTextUpdate } from './yitems.js';
 
 const PRESENCE_COLORS = ['#0076A6', '#621360', '#FF00FF', '#008148', '#B85C00'];
 
@@ -33,6 +34,14 @@ export function setFieldTexts(ydoc, yFields, fields, origin) {
     }
   }, origin);
 }
+
+/** Publish a section's rows (from the editor or a restore) to the shared doc. */
+export function applyLocalItems(collab, fieldId, items) {
+  const yarr = collab?.yItems?.[fieldId];
+  if (yarr) applyItemsToY(Y, yarr, items, collab.provider._localOrigin);
+}
+
+export { itemsFromY };
 
 export class FirebaseYjsProvider {
   constructor(canvasId, ydoc) {
@@ -128,13 +137,15 @@ export function colorForUser(uid) {
 }
 
 /**
- * Bind every editable field to a Y.Text via a Y.Doc, mirroring remote
- * changes into the DOM and local input into the CRDT.
+ * Bind the header fields to Y.Texts and each section to a Y.Array of item
+ * records, mirroring remote changes out through onRemoteUpdate(fieldId, value)
+ * where value is a string for header fields and an item array for sections.
  */
-export async function bindCollaborativeFields(canvasId, elementsById, canvasFields, onRemoteUpdate) {
+export async function bindCollaborativeFields(canvasId, elementsById, canvasFields, canvasItems, onRemoteUpdate) {
   const ydoc = new Y.Doc();
   const provider = new FirebaseYjsProvider(canvasId, ydoc);
   const yFields = {};
+  const yItems = {};
 
   // Await any stored history from active session
   await provider.synced;
@@ -142,47 +153,45 @@ export async function bindCollaborativeFields(canvasId, elementsById, canvasFiel
   for (const fieldId of FIELD_IDS) {
     const el = elementsById[fieldId];
     if (!el) continue;
-    const ytext = ydoc.getText(fieldId);
-    yFields[fieldId] = ytext;
 
-    // Seed local ytext ONLY if empty, using a seed origin that is never published to RTDB
-    if (ytext.toString() === '' && canvasFields?.[fieldId]) {
-      ydoc.transact(() => {
-        ytext.insert(0, canvasFields[fieldId]);
-      }, Symbol('seed'));
-    }
-
-    // Header fields ('title', 'by') are plain text and bind direct input
     if (['title', 'by'].includes(fieldId)) {
-      if (ytext.toString() !== '') {
-        el.textContent = ytext.toString();
+      const ytext = ydoc.getText(fieldId);
+      yFields[fieldId] = ytext;
+      // Seeds are published so later edits have their base on every peer;
+      // the content-derived client id stops two simultaneous seeds doubling.
+      if (ytext.toString() === '' && canvasFields?.[fieldId]) {
+        Y.applyUpdate(ydoc, seedTextUpdate(Y, fieldId, canvasFields[fieldId]), provider._localOrigin);
       }
+      if (ytext.toString() !== '') el.textContent = ytext.toString();
       el.addEventListener('input', () => {
         applyTextDiff(ytext, el.textContent || '', provider._localOrigin);
       });
-    }
-
-    // Remote changes observer (only reacts to remote peer updates from RTDB)
-    ytext.observe((event) => {
-      if (domSyncPaused) return;
-      if (event.transaction.origin !== provider._remoteOrigin) return;
-      const remoteValue = ytext.toString();
-
-      if (onRemoteUpdate) {
-        onRemoteUpdate(fieldId, remoteValue);
-      } else if (['title', 'by'].includes(fieldId)) {
-        if (el.textContent !== remoteValue) {
+      ytext.observe((event) => {
+        if (domSyncPaused || event.transaction.origin !== provider._remoteOrigin) return;
+        const remoteValue = ytext.toString();
+        if (onRemoteUpdate) {
+          onRemoteUpdate(fieldId, remoteValue);
+        } else if (el.textContent !== remoteValue) {
           const caret = window.getSelection()?.focusOffset ?? 0;
           el.textContent = remoteValue;
-          if (document.activeElement === el) {
-            placeCaret(el, Math.min(caret, remoteValue.length));
-          }
+          if (document.activeElement === el) placeCaret(el, Math.min(caret, remoteValue.length));
         }
-      }
+      });
+      continue;
+    }
+
+    const yarr = ydoc.getArray(itemsKey(fieldId));
+    yItems[fieldId] = yarr;
+    if (yarr.length === 0 && canvasItems?.[fieldId]?.length) {
+      Y.applyUpdate(ydoc, seedItemsUpdate(Y, fieldId, canvasItems[fieldId]), provider._localOrigin);
+    }
+    yarr.observeDeep((events) => {
+      if (domSyncPaused || events[0]?.transaction.origin !== provider._remoteOrigin) return;
+      onRemoteUpdate?.(fieldId, itemsFromY(yarr));
     });
   }
 
-  return { ydoc, provider, yFields };
+  return { ydoc, provider, yFields, yItems };
 }
 
 function placeCaret(el, offset) {
