@@ -6,7 +6,7 @@
 // scale characteristics change.
 import * as Y from 'https://esm.sh/yjs@13';
 import { rtdb } from './firebase-config.js';
-import { ref, onValue, push, onDisconnect, set as rtdbSet } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js';
+import { ref, onValue, onChildAdded, push, onDisconnect, set as rtdbSet } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js';
 import { FIELD_IDS } from './canvas-data.js';
 import { errorReporter } from './error-reporter.js';
 import { applyTextDiff } from './text-diff.js';
@@ -72,21 +72,24 @@ export class FirebaseYjsProvider {
         });
     });
 
-    // Apply remote updates as they arrive.
+    // Apply remote updates as they arrive. child_added delivers each update
+    // once (the stored history on attach, then only new ones), rather than
+    // re-sending the whole history to every client on every keystroke.
     this._remoteOrigin = Symbol('remote');
-    onValue(this.updatesRef, (snapshot) => {
-      snapshot.forEach((child) => {
-        if (appliedKeys.has(child.key)) return;
-        appliedKeys.add(child.key);
-        const val = child.val();
-        if (!val || val.clientId === this.ydoc.clientID) return;
-        Y.applyUpdate(this.ydoc, new Uint8Array(val.data), this._remoteOrigin);
-      });
-      this._resolveSynced();
-    }, (err) => {
+    const onError = (err) => {
       errorReporter.report('rtdb_stream', err, { canvasId: this.canvasId, path: 'updates' });
       this._resolveSynced();
-    });
+    };
+    onChildAdded(this.updatesRef, (child) => {
+      if (appliedKeys.has(child.key)) return;
+      appliedKeys.add(child.key);
+      const val = child.val();
+      if (!val || val.clientId === this.ydoc.clientID) return;
+      Y.applyUpdate(this.ydoc, new Uint8Array(val.data), this._remoteOrigin);
+    }, onError);
+    // A value event fires after the initial child_added events for the same
+    // location, from the same download, so it marks "history applied".
+    onValue(this.updatesRef, () => this._resolveSynced(), onError, { onlyOnce: true });
   }
 
   setLocalAwareness(uid, state, immediate = true) {
