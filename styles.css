@@ -15,23 +15,23 @@
     --on-primary: #FFFFFF;
     --primary-container: #EADDFF;
     --on-primary-container: #21005D;
-    --elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
-    --elevation-2: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
-    --elevation-3: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3);
-    --radius-s: 8px;
-    --radius-m: 12px;
-    --radius-l: 16px;
-    --space-1: 4px;
-    --space-2: 8px;
-    --space-3: 16px;
-    --space-4: 24px;
+    --elevation-1: 0 .0625em .125em rgba(0,0,0,0.3), 0 .0625em .1875em .0625em rgba(0,0,0,0.15);
+    --elevation-2: 0 .0625em .125em rgba(0,0,0,0.3), 0 .125em .375em .125em rgba(0,0,0,0.15);
+    --elevation-3: 0 .25em .5em .1875em rgba(0,0,0,0.15), 0 .0625em .1875em rgba(0,0,0,0.3);
+    --radius-s: .5em;
+    --radius-m: .75em;
+    --radius-l: 1em;
+    --space-1: .25em;
+    --space-2: .5em;
+    --space-3: 1em;
+    --space-4: 1.5em;
 
     --grid-template-areas:
     "header header header header header header header header header header"
     "kp kp ka ka vp vp bs bs be be"
     "kp kp kr kr vp vp de de be be"
     "mb mb mb mb mb if if if if if";
-    --grid-template-columns: repeat(10, 1fr);
+    --grid-template-columns: repeat(10, minmax(0, 1fr));
     --grid-template-rows: min-content auto auto auto;
 }
 
@@ -49,8 +49,18 @@
         "mb" 
         "if";
         
-        --grid-template-columns: 1fr;
-        --grid-template-rows: repeat(14, 1fr);
+        --grid-template-columns: minmax(0, 1fr);
+        /* One column: the page scrolls, sections take the height their text needs */
+        --grid-template-rows: auto;
+        --grid-auto-rows: minmax(6em, auto);
+        --grid-height: auto;
+    }
+
+
+    /* Fill what's left under the heading (100% would add the heading's height again) */
+    .grid-item .e {
+        height: auto;
+        flex: 1 0 auto;
     }
 
     #focus-modal:modal {
@@ -106,9 +116,9 @@
         --on-primary: #381E72;
         --primary-container: #4F378B;
         --on-primary-container: #EADDFF;
-        --elevation-1: 0 1px 2px rgba(0,0,0,0.6), 0 1px 3px 1px rgba(0,0,0,0.4);
-        --elevation-2: 0 1px 2px rgba(0,0,0,0.6), 0 2px 6px 2px rgba(0,0,0,0.4);
-        --elevation-3: 0 4px 8px 3px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.6);
+        --elevation-1: 0 .0625em .125em rgba(0,0,0,0.6), 0 .0625em .1875em .0625em rgba(0,0,0,0.4);
+        --elevation-2: 0 .0625em .125em rgba(0,0,0,0.6), 0 .125em .375em .125em rgba(0,0,0,0.4);
+        --elevation-3: 0 .25em .5em .1875em rgba(0,0,0,0.4), 0 .0625em .1875em rgba(0,0,0,0.6);
     }
     img {
         filter: invert(1);
@@ -121,7 +131,7 @@
     .grid-item:focus-within h2 img,
     .grid-item.hi h2 img,
     .grid-item.remote-editing h2 img {
-        filter: grayscale(0%) invert(0) drop-shadow(0 0 1px rgba(255, 255, 255, 0.4));
+        filter: grayscale(0%) invert(0) drop-shadow(0 0 .0625em rgba(255, 255, 255, 0.4));
         opacity: 1;
         transform: scale(1.1);
     }
@@ -147,7 +157,7 @@ body {
     display: flex;
     flex-direction: column;
     background-color: var(--white);
-    border: 1px solid var(--darkgrey);
+    border: thin solid var(--darkgrey);
     padding: 1em;
     transition: opacity 0.25s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
@@ -167,7 +177,8 @@ body {
 .grid-container {
     display: grid;
     margin: 1em;
-    height: 96svh;
+    height: var(--grid-height, 96svh);
+    grid-auto-rows: var(--grid-auto-rows, auto);
     grid-template-areas: var(--grid-template-areas);
     grid-template-columns: var(--grid-template-columns);
     grid-template-rows: var(--grid-template-rows);
@@ -203,9 +214,41 @@ header .author {
 header .title-block {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     column-gap: 1em;
     flex: 1;
+    min-width: 0;
+}
+
+/* Long titles wrap rather than widening the page */
+#title,
+#by {
+    overflow-wrap: anywhere;
+}
+
+/* Narrower screens: after the header rules above, so these win */
+@media (width < 60em) {
+    /* Title over author on the left, toolbar pinned top right */
+    header {
+        align-items: flex-start;
+        gap: .75em;
+    }
+
+    header .title-block {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    header h1 {
+        font-size: 1.5em;
+    }
+
+    header .author {
+        font-size: 1.15em;
+        margin-left: 0;
+        text-align: left;
+    }
 }
 
 header div {
@@ -222,7 +265,7 @@ header label {
 .credits {
     margin-block-start: var(--space-4);
     padding-block-start: var(--space-2);
-    border-top: 1px solid var(--outline-variant);
+    border-top: thin solid var(--outline-variant);
     font-size: 0.8em;
     color: var(--darkgrey);
 }
@@ -301,7 +344,7 @@ h2 img:hover {
 }
 
 .hi {
-    box-shadow: inset 0 0 0 2px var(--outline);
+    box-shadow: inset 0 0 0 .125em var(--outline);
 }
 
 .lo {
@@ -309,7 +352,7 @@ h2 img:hover {
 }
 
 .grid-item:has(*:focus) {
-    box-shadow: inset 0 0 0 2px var(--outline);
+    box-shadow: inset 0 0 0 .125em var(--outline);
 }
 
 .grid-item:has(*:focus) h2 img,
@@ -336,11 +379,11 @@ h2 img:hover {
     font-weight: 600;
     color: #ffffff;
     padding: 0.15em 0.55em;
-    border-radius: 999px;
+    border-radius: 62.4375em;
     letter-spacing: 0.02em;
     white-space: nowrap;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 .0625em .0625em rgba(0, 0, 0, 0.4);
+    box-shadow: 0 .0625em .1875em rgba(0, 0, 0, 0.2);
     pointer-events: none;
     animation: fadeInTag 0.2s ease;
 }
@@ -352,9 +395,9 @@ h2 img:hover {
 
 /* Remote collaborator cursor presence: halo outline + collaborator tag without child DOM */
 .canvas-list li.remote-cursor-active {
-    outline: 2px solid var(--remote-user-color, #7C3AED);
-    outline-offset: 2px;
-    border-radius: 3px;
+    outline: medium solid var(--remote-user-color, #7C3AED);
+    outline-offset: .125em;
+    border-radius: .1875em;
     position: relative;
     transition: outline-color 0.2s ease;
 }
@@ -369,12 +412,12 @@ h2 img:hover {
     font-size: 0.65rem;
     font-weight: 600;
     padding: 0.1em 0.45em;
-    border-radius: 3px;
+    border-radius: .1875em;
     white-space: nowrap;
     pointer-events: none;
     z-index: 10;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 .0625em .1875em rgba(0, 0, 0, 0.3);
+    text-shadow: 0 .0625em .0625em rgba(0, 0, 0, 0.4);
     line-height: 1.2;
 }
 
@@ -463,8 +506,8 @@ h2 img:focus-visible,
 .app-menu-item:focus-visible,
 .btn-filled:focus-visible,
 dialog button:focus-visible {
-    outline: 2px solid var(--outline);
-    outline-offset: 2px;
+    outline: medium solid var(--outline);
+    outline-offset: .125em;
     border-radius: var(--radius-s);
 }
 
@@ -478,9 +521,9 @@ dialog button:focus-visible {
     height: min(86svh, 50em);
     max-width: 92vw;
     max-height: 86svh;
-    border-radius: var(--radius-l, 14px);
-    border: 1px solid var(--outline-variant, #CCCCCC);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+    border-radius: var(--radius-l, .875em);
+    border: thin solid var(--outline-variant, #CCCCCC);
+    box-shadow: 0 1em 3em rgba(0, 0, 0, 0.35);
     background: var(--surface, var(--white));
     color: var(--black);
     margin: auto;
@@ -493,8 +536,8 @@ dialog button:focus-visible {
 
 #focus-modal::backdrop {
     background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(.125em);
+    -webkit-backdrop-filter: blur(.125em);
 }
 
 /* Opening/closing the focus view morphs the section into place
@@ -524,18 +567,18 @@ dialog button:focus-visible {
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    padding-top: 6px;
+    padding-top: .375em;
 }
 
 .focus-bar::before {
     content: '';
     display: block;
     width: 2.5em;
-    height: 4px;
+    height: .25em;
     background: var(--lightgrey, #CCCCCC);
-    border-radius: 2px;
+    border-radius: .125em;
     position: absolute;
-    top: -6px;
+    top: -.375em;
     left: 50%;
     transform: translateX(-50%);
     opacity: 0.6;
@@ -569,9 +612,9 @@ dialog button:focus-visible {
     display: flex;
     flex-direction: column;
     padding-block-start: var(--space-3);
-    /* Room for row outlines (up to 2px + 2px offset), which the scroll box would clip. */
-    padding-inline: 6px;
-    padding-block-end: 6px;
+    /* Room for row outlines (up to .125em + .125em offset), which the scroll box would clip. */
+    padding-inline: .375em;
+    padding-block-end: .375em;
     min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -594,7 +637,7 @@ dialog button:focus-visible {
 
 /* Extra space between rows, sized by row-spacing.js to the section's spare height. */
 .canvas-list li + li {
-    margin-top: calc(0.15em + var(--row-gap, 0px));
+    margin-top: calc(0.15em + var(--row-gap, 0em));
 }
 
 /* Class display rules (e.g. .login-gate's flex) would otherwise beat the UA [hidden] style */
@@ -706,7 +749,7 @@ dialog button:focus-visible {
 
 .app-menu hr {
     border: none;
-    border-top: 1px solid var(--outline-variant);
+    border-top: thin solid var(--outline-variant);
     margin: var(--space-2) 0;
 }
 
@@ -745,7 +788,7 @@ dialog button:focus-visible {
     font-size: 0.7em;
     font-weight: bold;
     color: var(--white);
-    border: 2px solid var(--white);
+    border: medium solid var(--white);
     margin-inline-start: -0.5em;
 }
 
@@ -754,7 +797,7 @@ dialog input[type="text"],
 dialog input[type="email"],
 dialog select,
 dialog textarea {
-    border: 1px solid var(--outline);
+    border: thin solid var(--outline);
     border-radius: var(--radius-s);
     background: var(--surface);
     padding: 0.6em 0.8em;
@@ -766,8 +809,8 @@ dialog input[type="text"]:focus,
 dialog input[type="email"]:focus,
 dialog select:focus,
 dialog textarea:focus {
-    outline: 2px solid var(--primary);
-    outline-offset: -1px;
+    outline: medium solid var(--primary);
+    outline-offset: -.0625em;
 }
 
 dialog button {
@@ -828,7 +871,7 @@ dialog button {
     width: 20em;
     max-width: 90vw;
     background: var(--surface);
-    border-left: 1px solid var(--outline-variant);
+    border-left: thin solid var(--outline-variant);
     box-shadow: var(--elevation-2);
     padding: var(--space-3);
     display: flex;
@@ -867,7 +910,7 @@ dialog button {
     flex-direction: column;
     gap: var(--space-1);
     padding-block-start: var(--space-2);
-    border-top: 1px solid var(--outline-variant);
+    border-top: thin solid var(--outline-variant);
 }
 
 .history-list li {
@@ -907,7 +950,7 @@ dialog button {
 
 .history-selected-actions {
     padding-block-start: var(--space-2);
-    border-top: 1px solid var(--outline-variant);
+    border-top: thin solid var(--outline-variant);
 }
 
 .history-selected-actions .btn-filled {
@@ -938,7 +981,7 @@ dialog button {
    --contrib-bar is a hard-stop gradient set from contributors.js. */
 .contributor-highlighted {
     background-image: var(--contrib-bar);
-    background-size: 100% 4px;
+    background-size: 100% .25em;
     background-position: top left;
     background-repeat: no-repeat;
 }
@@ -1059,7 +1102,7 @@ a.app-menu-item {
 }
 
 .canvas-card-link:focus-visible {
-    box-shadow: inset 0 0 0 2px var(--primary);
+    box-shadow: inset 0 0 0 .125em var(--primary);
 }
 
 .canvas-card-text {
@@ -1095,14 +1138,14 @@ a.app-menu-item {
         "kp kp kr kr vp vp de de be be"
         "mb mb mb mb mb if if if if if";
     grid-template-columns: repeat(10, 1fr);
-    gap: 2px;
+    gap: .125em;
     width: 4.5em;
     height: 3em;
 }
 
 .canvas-thumb i {
-    border-radius: 2px;
-    box-shadow: inset 0 0 0 1px var(--outline-variant);
+    border-radius: .125em;
+    box-shadow: inset 0 0 0 .0625em var(--outline-variant);
 }
 
 .canvas-thumb i.filled {
@@ -1207,7 +1250,7 @@ a.app-menu-item {
     list-style: none;
     padding: 0 0.4em 0 1.35em;
     margin: 0.15em 0;
-    border-radius: var(--radius-s, 6px);
+    border-radius: var(--radius-s, .375em);
     min-height: 1.5em;
     line-height: 1.45;
     word-break: break-word;
@@ -1258,13 +1301,13 @@ a.app-menu-item {
 .canvas-list li[data-bullet="🛡️"]::before { content: '🛡️'; }
 
 .canvas-list li.row-drag-over {
-    outline: 2px dashed var(--primary, #7C3AED);
+    outline: medium dashed var(--primary, #7C3AED);
     background-color: color-mix(in srgb, var(--primary, #7C3AED) 18%, transparent);
 }
 
 .canvas-list li.assoc-highlight {
-    outline: 2px solid var(--primary, #7C3AED);
-    box-shadow: 0 0 8px color-mix(in srgb, var(--primary, #7C3AED) 45%, transparent);
+    outline: medium solid var(--primary, #7C3AED);
+    box-shadow: 0 0 .5em color-mix(in srgb, var(--primary, #7C3AED) 45%, transparent);
 }
 
 /* Default bullet is an emoji, which ignores `color`, so swap it for dark mode. */
@@ -1309,10 +1352,10 @@ a.app-menu-item {
     justify-content: center;
     font-size: 1.4rem;
     border-radius: 50%;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 .25em 1em rgba(0, 0, 0, 0.35);
     transform: translate(-50%, -50%);
     background: var(--white, #FFFFFF);
-    border: 2px solid var(--primary, #7C3AED);
+    border: medium solid var(--primary, #7C3AED);
 }
 
 /* Bullet Customization Popup */
@@ -1320,16 +1363,16 @@ a.app-menu-item {
     position: absolute;
     z-index: 1000;
     background: var(--surface, #FFFFFF);
-    border: 1px solid var(--outline-variant, #CCCCCC);
-    border-radius: var(--radius-m, 10px);
-    box-shadow: var(--elevation-3, 0 8px 24px rgba(0, 0, 0, 0.25));
-    padding: var(--space-3, 12px);
+    border: thin solid var(--outline-variant, #CCCCCC);
+    border-radius: var(--radius-m, .625em);
+    box-shadow: var(--elevation-3, 0 .5em 1.5em rgba(0, 0, 0, 0.25));
+    padding: var(--space-3, .75em);
     display: flex;
     flex-direction: column;
     gap: 0.55em;
     width: 17em;
     max-width: 90vw;
-    max-height: calc(100vh - 24px);
+    max-height: calc(100vh - 1.5em);
     overflow-y: auto;
 }
 
@@ -1346,8 +1389,8 @@ a.app-menu-item {
     width: 100%;
     font-size: 1.1em;
     padding: 0.35em 0.5em;
-    border: 1px solid var(--outline-variant, #CCCCCC);
-    border-radius: var(--radius-s, 6px);
+    border: thin solid var(--outline-variant, #CCCCCC);
+    border-radius: var(--radius-s, .375em);
     background: var(--surface-variant, #F5F5F5);
     color: var(--black, #222222);
     text-align: center;
@@ -1356,7 +1399,7 @@ a.app-menu-item {
 .bullet-chip-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: .25em;
     max-height: 7em;
     overflow-y: auto;
 }
@@ -1368,8 +1411,8 @@ a.app-menu-item {
     min-width: 1.8em;
     height: 1.8em;
     padding: 0.1em;
-    border-radius: var(--radius-s, 6px);
-    border: 1px solid var(--outline-variant, #E0E0E0);
+    border-radius: var(--radius-s, .375em);
+    border: thin solid var(--outline-variant, #E0E0E0);
     background: var(--surface-variant, #F5F5F5);
     font-size: 1.05em;
     cursor: pointer;
@@ -1379,12 +1422,12 @@ a.app-menu-item {
 .bullet-chip-btn:hover {
     transform: scale(1.15);
     border-color: var(--primary, #7C3AED);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 .125em .375em rgba(0, 0, 0, 0.18);
 }
 
 .bullet-chip-btn.active {
-    outline: 2px solid var(--primary, #7C3AED);
-    box-shadow: 0 0 0 1px var(--primary, #7C3AED);
+    outline: medium solid var(--primary, #7C3AED);
+    box-shadow: 0 0 0 .0625em var(--primary, #7C3AED);
 }
 
 /* Palette chip colors */
@@ -1420,14 +1463,14 @@ a.app-menu-item {
 .bullet-swatch-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: .25em;
 }
 
 .bullet-swatch-btn {
     width: 1.5em;
     height: 1.5em;
-    border-radius: 4px;
-    border: 1px solid var(--outline-variant, #CCCCCC);
+    border-radius: .25em;
+    border: thin solid var(--outline-variant, #CCCCCC);
     cursor: pointer;
     padding: 0;
     transition: transform 0.1s ease, outline 0.1s ease;
@@ -1438,11 +1481,11 @@ a.app-menu-item {
 }
 
 .bullet-swatch-btn.active {
-    outline: 2px solid var(--superblack, #000000);
+    outline: medium solid var(--superblack, #000000);
 }
 
 .bullet-swatch-btn.clear-swatch {
-    background: repeating-linear-gradient(45deg, #eee, #eee 3px, #fff 3px, #fff 6px);
+    background: repeating-linear-gradient(45deg, #eee, #eee .1875em, #fff .1875em, #fff .375em);
     position: relative;
 }
 
@@ -1458,7 +1501,7 @@ a.app-menu-item {
 
 .bullet-popup-divider {
     border: none;
-    border-top: 1px solid var(--outline-variant, #CCCCCC);
+    border-top: thin solid var(--outline-variant, #CCCCCC);
     margin: 0.2em 0;
 }
 
@@ -1477,8 +1520,8 @@ a.app-menu-item {
     padding: 0.45em 0.6em;
     font-size: 0.78rem;
     font-weight: 500;
-    border-radius: var(--radius-s, 6px);
-    border: 1px solid var(--outline-variant, #CCCCCC);
+    border-radius: var(--radius-s, .375em);
+    border: thin solid var(--outline-variant, #CCCCCC);
     background: var(--surface-variant, #F5F5F5);
     color: var(--black, #222222);
     cursor: pointer;
@@ -1523,12 +1566,12 @@ a.app-menu-item {
     font-size: 0.78rem;
     font-weight: 500;
     padding: 0.25rem 0.55rem;
-    border-radius: var(--radius-full, 9999px);
+    border-radius: var(--radius-full, 624.9375em);
     cursor: pointer;
     user-select: none;
     transition: background 0.15s ease, color 0.15s ease, opacity 0.2s ease;
     color: var(--darkgrey);
-    border: 1px solid transparent;
+    border: thin solid transparent;
 }
 
 .sync-status:hover {
@@ -1579,8 +1622,8 @@ a.app-menu-item {
 
 @keyframes sync-shake {
     0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-2px); }
-    75% { transform: translateX(2px); }
+    25% { transform: translateX(-.125em); }
+    75% { transform: translateX(.125em); }
 }
 
 .sync-icon {
@@ -1613,9 +1656,9 @@ a.app-menu-item {
     padding: 0.65rem 0.9rem;
     background: var(--surface, #FFFFFF);
     color: var(--black, #222222);
-    border: 1px solid var(--outline-variant, #E0E0E0);
-    border-radius: var(--radius-m, 8px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    border: thin solid var(--outline-variant, #E0E0E0);
+    border-radius: var(--radius-m, .5em);
+    box-shadow: 0 .25em 1em rgba(0, 0, 0, 0.15);
     font-size: 0.85rem;
     line-height: 1.35;
     animation: toast-slide-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1624,13 +1667,13 @@ a.app-menu-item {
 
 .toast-dismissing {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(.5em);
 }
 
 @keyframes toast-slide-in {
     from {
         opacity: 0;
-        transform: translateY(12px) scale(0.96);
+        transform: translateY(.75em) scale(0.96);
     }
     to {
         opacity: 1;
@@ -1645,8 +1688,8 @@ a.app-menu-item {
 
 .toast-action-btn {
     background: var(--surface-variant, #F0F0F0);
-    border: 1px solid var(--outline-variant, #CCCCCC);
-    border-radius: var(--radius-s, 4px);
+    border: thin solid var(--outline-variant, #CCCCCC);
+    border-radius: var(--radius-s, .25em);
     padding: 0.25rem 0.55rem;
     font-size: 0.78rem;
     font-weight: 600;
@@ -1674,19 +1717,19 @@ a.app-menu-item {
 }
 
 .toast-card.toast-error {
-    border-left: 4px solid #EF4444;
+    border-left: thick solid #EF4444;
 }
 
 .toast-card.toast-warning {
-    border-left: 4px solid #F59E0B;
+    border-left: thick solid #F59E0B;
 }
 
 .toast-card.toast-success {
-    border-left: 4px solid #10B981;
+    border-left: thick solid #10B981;
 }
 
 .toast-card.toast-info {
-    border-left: 4px solid #3B82F6;
+    border-left: thick solid #3B82F6;
 }
 
 /* ==========================================================================
@@ -1710,8 +1753,8 @@ a.app-menu-item {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 0.78rem;
     padding: 0.85rem;
-    border-radius: var(--radius-s, 4px);
-    border: 1px solid var(--outline-variant, #49454F);
+    border-radius: var(--radius-s, .25em);
+    border: thin solid var(--outline-variant, #49454F);
     max-height: 20rem;
     overflow-y: auto;
     white-space: pre-wrap;
@@ -1721,3 +1764,25 @@ a.app-menu-item {
 
 
 .share-note { font-size: 0.9em; opacity: 0.8; }
+
+/* Checkbox rows: a gap before the label, and wrapped text stays clear of the box */
+dialog label:has(> input[type="checkbox"]) {
+    display: flex;
+    align-items: baseline;
+    gap: .5em;
+}
+
+.canvas-list-top .btn-filled {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.dialog-note {
+    color: var(--darkgrey);
+    font-size: .9em;
+}
+
+.api-token-list {
+    list-style: none;
+    margin-block: .5em;
+}

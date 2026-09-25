@@ -109,7 +109,7 @@ async function renderApiTokens() {
     list.innerHTML = '';
     if (!data.tokens.length) {
       const item = document.createElement('li');
-      item.className = 'canvas-list-note';
+      item.className = 'dialog-note';
       item.textContent = 'No tokens yet.';
       list.appendChild(item);
     }

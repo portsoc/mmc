@@ -24,7 +24,7 @@ function innerBottom(box) {
 function refit() {
   queued = false;
   const lists = [...document.querySelectorAll('.canvas-list')].filter(boundsFor);
-  for (const list of lists) list.style.setProperty('--row-gap', '0px');
+  for (const list of lists) list.style.setProperty('--row-gap', '0em');
   // Measure everything before writing anything, so layout is computed once.
   const gaps = lists.map((list) => {
     const rows = list.children.length;
@@ -36,10 +36,12 @@ function refit() {
     const last = list.lastElementChild;
     const used = last.getBoundingClientRect().bottom + parseFloat(getComputedStyle(last).marginBottom);
     const slack = innerBottom(box) - pad - used;
-    const max = MAX_GAP_EM * parseFloat(getComputedStyle(list).fontSize);
-    return Math.max(0, Math.min(max, Math.floor(slack / (rows - 1))));
+    const em = parseFloat(getComputedStyle(list).fontSize);
+    const gap = Math.max(0, Math.min(MAX_GAP_EM * em, Math.floor(slack / (rows - 1))));
+    return gap / em;
   });
-  lists.forEach((list, i) => list.style.setProperty('--row-gap', `${gaps[i]}px`));
+  // Written in em (rounded down) so the gap scales with the text.
+  lists.forEach((list, i) => list.style.setProperty('--row-gap', `${Math.floor(gaps[i] * 1000) / 1000}em`));
 }
 
 /** Refit on the next frame; repeated calls in one frame coalesce. */

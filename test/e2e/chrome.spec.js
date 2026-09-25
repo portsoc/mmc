@@ -21,8 +21,8 @@ test('a section opens in the focus modal, is editable there, and returns on clos
 
 test('row spacing grows into spare room and tightens instead of overflowing', async ({ page }) => {
   await openNewCanvas(page, testEmail('rowgap'));
-  const gapOf = (sel) => page.locator(sel).evaluate(el =>
-    parseFloat(el.style.getPropertyValue('--row-gap')) / parseFloat(getComputedStyle(el).fontSize));
+  // --row-gap is written in em
+  const gapOf = (sel) => page.locator(sel).evaluate(el => parseFloat(el.style.getPropertyValue('--row-gap')));
 
   // Grid: a few rows in a roomy section get the full extra 1em.
   await page.locator('#ekp').click();
