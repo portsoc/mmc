@@ -192,17 +192,25 @@ export function initCanvasChrome() {
   }
 
   el.help?.addEventListener('click', openUsageDialog);
+  document.querySelector('#usage-close')?.addEventListener('click', () => {
+    document.querySelector('#usage').close();
+  });
 
   document.querySelector('#focus-close')?.addEventListener('click', () => {
     focusModal?.close();
   });
 
-  // Tapping outside the focus modal (on backdrop) closes it:
-  focusModal?.addEventListener('click', (e) => {
-    if (e.target === focusModal) {
-      focusModal.close();
-    }
-  });
+  // Clicking the backdrop closes any dialog, except ones marked
+  // data-keep-open (forms, where a stray click would lose typing). A click on
+  // the dialog's own padding also targets the dialog, so test the rectangle.
+  for (const dialog of document.querySelectorAll('dialog:not([data-keep-open])')) {
+    dialog.addEventListener('click', (e) => {
+      if (e.target !== dialog) return;
+      const r = dialog.getBoundingClientRect();
+      const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      if (!inside) dialog.close();
+    });
+  }
 
   // Swiping away the focus modal on touch devices:
   wireSwipeToDismiss(focusModal);
@@ -277,9 +285,5 @@ function openFocus(gridItem) {
 }
 
 function openUsageDialog() {
-  const dialog = document.querySelector('#usage');
-  dialog.showModal();
-  dialog.addEventListener('click', () => {
-    dialog.close();
-  });
+  document.querySelector('#usage').showModal();
 }

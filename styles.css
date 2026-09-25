@@ -524,12 +524,6 @@ strong {
     transform: scale(1.18);
 }
 
-.focus-actions {
-    display: flex;
-    justify-content: flex-end;
-    padding-block-start: var(--space-3);
-}
-
 #focus-slot {
     flex: 1;
     display: flex;
@@ -758,11 +752,18 @@ dialog button {
     content: none;
 }
 
+/* Every dialog ends with this row; primary action last (right). It sticks to
+   the bottom so Done stays reachable in long dialogs such as Help. */
 .dialog-actions {
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
     gap: var(--space-2);
+    position: sticky;
+    bottom: calc(-1 * var(--space-4));
+    margin-block-end: calc(-1 * var(--space-4));
+    padding-block-end: var(--space-4);
+    background: var(--surface);
 }
 
 /* Version history sidebar — newest at top, canvas shifts left to make room */

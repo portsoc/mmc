@@ -112,13 +112,13 @@
         <h1 id="focus-title"></h1>
     </div>
     <div id="focus-slot"></div>
-    <div class="focus-actions">
-        <button id="focus-close" type="button">Done</button>
+    <div class="dialog-actions">
+        <button id="focus-close" type="button" class="btn-filled">Done</button>
     </div>
 </dialog>
 
-<dialog id="usage">
-    <h1>Using the Mission Model Canvas</h1>
+<dialog id="usage" aria-labelledby="usage-title">
+    <h1 id="usage-title">Using the Mission Model Canvas</h1>
     <p>The canvas has nine sections ("Key Partners", "Key Activities", etc.) plus a title, description and team along the top.
     <h2>Editing</h2>
     <p><strong>Click</strong> a section and type. Everything saves automatically and appears for everyone on the canvas straight away.
@@ -140,11 +140,13 @@
         <p><span>Designed by:</span> Strategyzer AG &amp; Steve Blank. Built for the web at Uni. of Portsmouth.
         <p>This work is licensed under the <a href="https://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)</a>
     </footer>
-    <button id="usage-close">OK</button>
+    <div class="dialog-actions">
+        <button id="usage-close" type="button" class="btn-filled">Done</button>
+    </div>
 </dialog>
 
-<dialog id="share-modal">
-    <h1>Share &amp; Invite</h1>
+<dialog id="share-modal" aria-labelledby="share-title">
+    <h1 id="share-title">Share &amp; Invite</h1>
     <h2>Read-only link</h2>
     <p><label for="share-readonly-url">Link</label>
         <input id="share-readonly-url" type="text" readonly>
@@ -166,11 +168,13 @@
         <p><button id="invite-copy" type="button">Copy invite link</button>
     </div>
     <ul id="collaborator-list"></ul>
-    <button id="share-close">Close</button>
+    <div class="dialog-actions">
+        <button id="share-close" type="button" class="btn-filled">Done</button>
+    </div>
 </dialog>
 
-<dialog id="name-version-modal">
-    <h1>Name this version</h1>
+<dialog id="name-version-modal" aria-labelledby="name-version-title" data-keep-open>
+    <h1 id="name-version-title">Name this version</h1>
     <p>Saves the canvas as it is now, so you can find it in Version history.
     <p><label for="version-name">Name</label>
         <input id="version-name" type="text" placeholder="e.g. Week 3 validation">
@@ -182,8 +186,8 @@
     </div>
 </dialog>
 
-<dialog id="settings-modal">
-    <h1>Settings</h1>
+<dialog id="settings-modal" aria-labelledby="settings-title">
+    <h1 id="settings-title">Settings</h1>
     <h2>Account</h2>
     <p id="settings-account">Not signed in</p>
     <p><button id="settings-signout" type="button">Sign out</button>
@@ -200,7 +204,7 @@
     <h2>Diagnostics &amp; Troubleshooting</h2>
     <p><button id="settings-diagnostics" type="button">View diagnostics &amp; error logs</button></p>
     <div class="dialog-actions">
-        <button id="settings-close" type="button">Done</button>
+        <button id="settings-close" type="button" class="btn-filled">Done</button>
     </div>
 </dialog>
 
@@ -214,16 +218,18 @@
     </div>
     <div class="dialog-actions">
         <button id="diagnostics-clear" type="button">Clear logs</button>
-        <button id="diagnostics-copy" type="button" class="btn-filled">Copy diagnostics</button>
-        <button id="diagnostics-close" type="button">Close</button>
+        <button id="diagnostics-copy" type="button">Copy diagnostics</button>
+        <button id="diagnostics-close" type="button" class="btn-filled">Done</button>
     </div>
 </dialog>
 
-<dialog id="metrics-modal">
-    <h1>Contributors</h1>
+<dialog id="metrics-modal" aria-labelledby="metrics-title">
+    <h1 id="metrics-title">Contributors</h1>
     <div id="metrics-bar" class="metrics-bar" role="img" aria-label="Contribution breakdown"></div>
     <ol id="metrics-leaderboard"></ol>
-    <button id="metrics-close">Close</button>
+    <div class="dialog-actions">
+        <button id="metrics-close" type="button" class="btn-filled">Done</button>
+    </div>
 </dialog>
 
 <aside id="history-dock" class="history-dock" hidden aria-label="Version history">

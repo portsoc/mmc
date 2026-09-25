@@ -26,7 +26,27 @@ test('help opens from the menu', async ({ page }) => {
   await openNewCanvas(page, testEmail('help'));
   await page.locator('#menu-btn').click();
   await page.locator('#help').click();
-  await expect(page.locator('#usage')).toBeVisible();
+  const usage = page.locator('#usage');
+  await expect(usage).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Using the Mission Model Canvas' })).toBeVisible();
+  // Done stays reachable however long the dialog is
+  await expect(page.locator('#usage-close')).toBeInViewport();
+  // Clicking inside the dialog's padding keeps it open; the backdrop closes it
+  const box = await usage.boundingBox();
+  await page.mouse.click(box.x + 4, box.y + 4);
+  await expect(usage).toBeVisible();
+  await page.mouse.click(2, 2);
+  await expect(usage).toBeHidden();
+});
+
+test('a backdrop click does not close the name-version form', async ({ page }) => {
+  await openNewCanvas(page, testEmail('keepopen'));
+  await page.locator('#menu-btn').click();
+  await page.locator('#name-version-btn').click();
+  await page.locator('#version-name').fill('half-typed');
+  await page.mouse.click(2, 2);
+  await expect(page.locator('#name-version-modal')).toBeVisible();
+  await expect(page.locator('#version-name')).toHaveValue('half-typed');
 });
 
 test('a named version appears in history, is shown read-only, and closing returns to live text', async ({ page }) => {
