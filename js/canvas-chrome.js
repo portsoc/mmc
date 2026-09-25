@@ -223,6 +223,17 @@ export function initCanvasChrome() {
 
 }
 
+/** Spread the focus view's rows out as far as possible (up to 1em extra)
+ * without making it scroll; falls back to normal spacing when it's full. */
+const ROW_GAPS_EM = [1, 0.75, 0.5];
+function fitRowGap(slot) {
+  for (const gap of ROW_GAPS_EM) {
+    slot.style.setProperty('--focus-row-gap', `${gap}em`);
+    if (slot.scrollHeight <= slot.clientHeight) return;
+  }
+  slot.style.setProperty('--focus-row-gap', '0em');
+}
+
 /** Moves the section's own editable element into a focus dialog and
  * back on close, so sync/save listeners bound to it keep working. */
 function openFocus(gridItem) {
@@ -260,13 +271,20 @@ function openFocus(gridItem) {
 
   const marker = document.createComment('focus');
   editable.before(marker);
-  document.querySelector('#focus-slot').append(editable);
+  const slot = document.querySelector('#focus-slot');
+  slot.append(editable);
+  const refit = () => fitRowGap(slot);
+  editable.addEventListener('input', refit);
+  window.addEventListener('resize', refit);
   dialog.addEventListener('close', () => {
     dialog.style.transform = '';
     dialog.style.opacity = '';
+    editable.removeEventListener('input', refit);
+    window.removeEventListener('resize', refit);
     marker.replaceWith(editable);
   }, { once: true });
   dialog.showModal();
+  refit();
 
   // A <li> can't take focus itself; focus the editable list and put the
   // caret at the end of its last line, so typing goes straight in.

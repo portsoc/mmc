@@ -19,6 +19,29 @@ test('a section opens in the focus modal, is editable there, and returns on clos
   await expect(page.locator('#kp #ekp')).toContainText('focused');
 });
 
+test('focus view spreads rows out while they fit, and tightens instead of scrolling', async ({ page }) => {
+  await openNewCanvas(page, testEmail('rowgap'));
+  await page.locator('#kp h2 img').click();
+  const slot = page.locator('#focus-modal #focus-slot');
+  const gap = () => slot.evaluate(el => el.style.getPropertyValue('--focus-row-gap'));
+  const fits = () => slot.evaluate(el => el.scrollHeight <= el.clientHeight);
+
+  for (const line of ['one', 'two', 'three']) {
+    await page.keyboard.type(line);
+    await page.keyboard.press('Enter');
+  }
+  expect(await gap()).toBe('1em');
+  expect(await fits()).toBe(true);
+
+  for (let i = 0; i < 25; i++) {
+    await page.keyboard.type(`row ${i}`);
+    await page.keyboard.press('Enter');
+  }
+  expect(['0.75em', '0.5em', '0em']).toContain(await gap());
+  // Either it fits with some extra spacing, or spacing is back to normal.
+  if (!(await fits())) expect(await gap()).toBe('0em');
+});
+
 test('shift-click defocuses a section and typing in it refocuses', async ({ page }) => {
   await openNewCanvas(page, testEmail('defocus'));
   await page.locator('#ka h2').click({ modifiers: ['Shift'] });

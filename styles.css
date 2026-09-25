@@ -570,6 +570,11 @@ dialog button:focus-visible {
     display: flow-root;
 }
 
+/* Extra space between rows in focus view; canvas-chrome.js widens it only while nothing scrolls. */
+#focus-slot .canvas-list li + li {
+    margin-top: calc(0.15em + var(--focus-row-gap, 0em));
+}
+
 /* Class display rules (e.g. .login-gate's flex) would otherwise beat the UA [hidden] style */
 [hidden] {
     display: none !important;
