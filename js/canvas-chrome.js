@@ -85,7 +85,8 @@ function keyboardHandler(event) {
   if (event.key === 'Escape') {
     const focusModal = document.querySelector('#focus-modal');
     if (focusModal?.open) {
-      focusModal.close();
+      event.preventDefault();
+      closeFocus();
       return;
     }
     document.activeElement.blur();
@@ -139,7 +140,7 @@ function wireSwipeToDismiss(dialog) {
       const touch = e.changedTouches?.[0];
       const deltaY = touch ? touch.clientY - startY : 0;
       if (deltaY > 70) {
-        dialog.close();
+        closeFocus({ animate: false });
       } else {
         dialog.style.transform = '';
         dialog.style.opacity = '';
@@ -176,7 +177,7 @@ export function initCanvasChrome() {
         e.stopPropagation();
         e.preventDefault();
         if (focusModal?.open) {
-          focusModal.close();
+          closeFocus();
         } else {
           openFocus(item);
         }
@@ -196,8 +197,11 @@ export function initCanvasChrome() {
     document.querySelector('#usage').close();
   });
 
-  document.querySelector('#focus-close')?.addEventListener('click', () => {
-    focusModal?.close();
+  document.querySelector('#focus-close')?.addEventListener('click', () => closeFocus());
+  // The browser's own Escape/close request would skip the animation.
+  focusModal?.addEventListener('cancel', (e) => {
+    e.preventDefault();
+    closeFocus();
   });
 
   // Clicking the backdrop closes any dialog, except ones marked
@@ -208,7 +212,9 @@ export function initCanvasChrome() {
       if (e.target !== dialog) return;
       const r = dialog.getBoundingClientRect();
       const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
-      if (!inside) dialog.close();
+      if (inside) return;
+      if (dialog === focusModal) closeFocus();
+      else dialog.close();
     });
   }
 
@@ -221,6 +227,50 @@ export function initCanvasChrome() {
     if (e.target !== title) title.focus();
   });
 
+}
+
+/** Runs `update` inside a view transition that morphs the section box,
+ * heading and text between the grid and the focus view. Falls back to a
+ * plain update without View Transitions support or with reduced motion. */
+const VT_NAMES = { box: 'mmc-focus-box', head: 'mmc-focus-head', text: 'mmc-focus-text' };
+function withFocusTransition(gridItem, opening, update) {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!document.startViewTransition || reduce || !gridItem) {
+    update();
+    return;
+  }
+  const dialog = document.querySelector('#focus-modal');
+  const panel = [gridItem, gridItem.querySelector('h2')];
+  const modal = [dialog, document.querySelector('#focus-title')];
+  const editable = gridItem.querySelector('.e') || dialog.querySelector('#focus-slot .e');
+  const name = ([box, head], on) => {
+    box.style.viewTransitionName = on ? VT_NAMES.box : '';
+    head.style.viewTransitionName = on ? VT_NAMES.head : '';
+  };
+  // The editable is the same element in both states, so it keeps its name.
+  if (editable) editable.style.viewTransitionName = VT_NAMES.text;
+  name(opening ? panel : modal, true);
+  const vt = document.startViewTransition(() => {
+    name(opening ? panel : modal, false);
+    update();
+    name(opening ? modal : panel, true);
+  });
+  vt.finished.finally(() => {
+    name(panel, false);
+    name(modal, false);
+    if (editable) editable.style.viewTransitionName = '';
+  });
+}
+
+let focusedItem = null;
+
+/** Closes the focus view, animating back into the grid unless `animate`
+ * is false (swipe-to-dismiss already animates itself). */
+function closeFocus({ animate = true } = {}) {
+  const dialog = document.querySelector('#focus-modal');
+  if (!dialog?.open) return;
+  if (animate) withFocusTransition(focusedItem, false, () => dialog.close());
+  else dialog.close();
 }
 
 /** Spread the focus view's rows out as far as possible (up to 1em extra)
@@ -241,9 +291,14 @@ function openFocus(gridItem) {
   if (!editable) return;
   const dialog = document.querySelector('#focus-modal');
   if (dialog.open) {
-    dialog.close();
+    closeFocus();
     return;
   }
+  withFocusTransition(gridItem, true, () => showFocus(gridItem, editable, dialog));
+}
+
+function showFocus(gridItem, editable, dialog) {
+  focusedItem = gridItem;
 
   // Copy the heading including its icon, minus the id so it stays unique.
   const heading = gridItem.querySelector('h2').cloneNode(true);
@@ -261,7 +316,7 @@ function openFocus(gridItem) {
     const closeModal = (e) => {
       e.stopPropagation();
       e.preventDefault();
-      dialog.close();
+      closeFocus();
     };
     modalIcon.addEventListener('click', closeModal);
     modalIcon.addEventListener('keydown', (e) => {
@@ -277,6 +332,7 @@ function openFocus(gridItem) {
   editable.addEventListener('input', refit);
   window.addEventListener('resize', refit);
   dialog.addEventListener('close', () => {
+    focusedItem = null;
     dialog.style.transform = '';
     dialog.style.opacity = '';
     editable.removeEventListener('input', refit);

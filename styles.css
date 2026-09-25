@@ -496,6 +496,27 @@ dialog button:focus-visible {
     -webkit-backdrop-filter: blur(2px);
 }
 
+/* Opening/closing the focus view morphs the section into place
+   (names are set from canvas-chrome.js only for the transition). */
+::view-transition-group(mmc-focus-box),
+::view-transition-group(mmc-focus-head),
+::view-transition-group(mmc-focus-text),
+::view-transition-group(root) {
+    animation-duration: 280ms;
+    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+/* Keep the text at its real size, pinned top-left, while its box resizes. */
+::view-transition-old(mmc-focus-text),
+::view-transition-new(mmc-focus-text),
+::view-transition-old(mmc-focus-head),
+::view-transition-new(mmc-focus-head) {
+    height: 100%;
+    width: auto;
+    object-fit: none;
+    object-position: left top;
+    overflow: clip;
+}
+
 .focus-bar {
     position: relative;
     display: flex;

@@ -22,6 +22,8 @@ test('a section opens in the focus modal, is editable there, and returns on clos
 test('focus view spreads rows out while they fit, and tightens instead of scrolling', async ({ page }) => {
   await openNewCanvas(page, testEmail('rowgap'));
   await page.locator('#kp h2 img').click();
+  // Opening runs inside a view transition, so the modal appears a frame later.
+  await expect(page.locator('#focus-modal')).toBeVisible();
   const slot = page.locator('#focus-modal #focus-slot');
   const gap = () => slot.evaluate(el => el.style.getPropertyValue('--focus-row-gap'));
   const fits = () => slot.evaluate(el => el.scrollHeight <= el.clientHeight);
