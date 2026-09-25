@@ -296,7 +296,8 @@ export class RaggedLinksController {
               ? sel.anchorNode.closest('li')
               : sel.anchorNode?.parentElement?.closest('li');
             if (newLi) {
-              newLi.dataset.id = generateItemId(fieldId);
+              // No new id here: serializeSectionItems has already given the
+              // copied row a fresh one, and changing it again desyncs it.
               if (!newLi.textContent.trim()) {
                 newLi.removeAttribute('data-bullet');
                 newLi.removeAttribute('data-color');
@@ -438,6 +439,9 @@ export class RaggedLinksController {
 
     li.dataset.id = id;
     li.textContent = t;
+    // An empty <li> collapses to zero height, hiding blank lines; typing
+    // Enter gives the browser's own empty row a <br>, so match that.
+    if (!t) li.appendChild(document.createElement('br'));
 
     if (b && b !== DEFAULT_BULLET) {
       li.setAttribute('data-bullet', b);
@@ -952,9 +956,14 @@ export class RaggedLinksController {
     const items = list.querySelectorAll('li');
     const fieldId = sectionEl.id?.slice(1) || 'item';
     const result = [];
+    // Enter copies the current row's data-id onto the new row, and rows sync
+    // by id, so give any repeat (and any missing id) a fresh one here.
+    const seen = new Set();
     items.forEach(li => {
+      if (!li.dataset.id || seen.has(li.dataset.id)) li.dataset.id = generateItemId(fieldId);
+      seen.add(li.dataset.id);
       result.push({
-        id: li.dataset.id || generateItemId(fieldId),
+        id: li.dataset.id,
         text: li.textContent || '',
         bullet: li.getAttribute('data-bullet') || DEFAULT_BULLET,
         color: li.getAttribute('data-color') || '',
