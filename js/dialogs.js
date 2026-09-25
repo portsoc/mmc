@@ -10,6 +10,8 @@ import {
   setPublicReadOnly
 } from './canvas-data.js';
 import { createWaypoint } from './versions.js';
+import { httpsCallable } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-functions.js';
+import { functions } from './firebase-config.js';
 import { errorReporter } from './error-reporter.js';
 import { toastManager } from './feedback.js';
 import { state, prefs, savePrefs } from './app-state.js';
@@ -59,7 +61,11 @@ export function wireSettings() {
   document.body.classList.toggle('dim-unfocused', prefs.dimUnfocused);
   speed.value = String(prefs.playbackSpeed);
 
-  document.getElementById('settings-btn')?.addEventListener('click', () => modal.showModal());
+  document.getElementById('settings-btn')?.addEventListener('click', () => {
+    modal.showModal();
+    renderApiTokens();
+  });
+  wireApiTokens();
   document.getElementById('settings-close')?.addEventListener('click', () => modal.close());
   signoutBtn.addEventListener('click', async () => {
     await signOutUser();
@@ -82,6 +88,75 @@ export function wireSettings() {
   speed.addEventListener('change', () => {
     prefs.playbackSpeed = Number(speed.value);
     savePrefs();
+  });
+}
+
+// Personal API tokens for AI connectors (functions/api-tokens.js).
+const listApiTokens = httpsCallable(functions, 'listApiTokens');
+const createApiToken = httpsCallable(functions, 'createApiToken');
+const revokeApiToken = httpsCallable(functions, 'revokeApiToken');
+
+function formatTokenDate(iso) {
+  return iso ? new Date(iso).toLocaleDateString() : 'never';
+}
+
+async function renderApiTokens() {
+  const list = document.getElementById('api-token-list');
+  if (!list || !currentUser.value) return;
+  list.textContent = 'Loading…';
+  try {
+    const { data } = await listApiTokens();
+    list.innerHTML = '';
+    if (!data.tokens.length) {
+      const item = document.createElement('li');
+      item.className = 'canvas-list-note';
+      item.textContent = 'No tokens yet.';
+      list.appendChild(item);
+    }
+    for (const token of data.tokens) {
+      const item = document.createElement('li');
+      const label = document.createElement('span');
+      label.textContent = `${token.name} (…${token.hint}) · created ${formatTokenDate(token.createdAt)} · last used ${formatTokenDate(token.lastUsedAt)}`;
+      const revoke = document.createElement('button');
+      revoke.type = 'button';
+      revoke.textContent = 'Revoke';
+      revoke.addEventListener('click', async () => {
+        if (!confirm(`Revoke "${token.name}"? Tools using it will stop working.`)) return;
+        await revokeApiToken({ id: token.id });
+        renderApiTokens();
+      });
+      item.append(label, ' ', revoke);
+      list.appendChild(item);
+    }
+  } catch (err) {
+    list.textContent = `Couldn't load tokens: ${err.message}`;
+  }
+}
+
+function wireApiTokens() {
+  const panel = document.getElementById('api-token-new');
+  const value = document.getElementById('api-token-value');
+  document.getElementById('api-token-create')?.addEventListener('click', async () => {
+    const name = prompt('Name this token (e.g. "Claude Desktop"):', 'AI connector');
+    if (name === null) return;
+    try {
+      const { data } = await createApiToken({ name });
+      value.value = data.token;
+      panel.hidden = false;
+      value.select();
+      renderApiTokens();
+    } catch (err) {
+      toastManager.error(`Couldn't create token: ${err.message}`);
+    }
+  });
+  document.getElementById('api-token-copy')?.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(value.value);
+    toastManager.success('Token copied');
+  });
+  // The token is only ever shown once; forget it when Settings closes.
+  document.getElementById('settings-modal')?.addEventListener('close', () => {
+    value.value = '';
+    panel.hidden = true;
   });
 }
 

@@ -72,6 +72,11 @@ service cloud.firestore {
       }
     }
 
+    // Personal API tokens (functions/api-tokens.js): server-only.
+    match /api_tokens/{tokenHash} {
+      allow read, write: if false;
+    }
+
     match /public_tokens/{token} {
       allow read: if true;
       allow write: if false; // only written by Cloud Functions / trusted server code

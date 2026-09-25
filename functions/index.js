@@ -8,6 +8,10 @@ module.exports = {
   ...require('./snapshots'),
   ...require('./canvases'),
   ...require('./errors'),
+  createApiToken: require('./api-tokens').createApiToken,
+  listApiTokens: require('./api-tokens').listApiTokens,
+  revokeApiToken: require('./api-tokens').revokeApiToken,
+  mcp: require('./mcp').mcp,
   mirrorCanvasAccess: require('./access').mirrorCanvasAccess
 };
 

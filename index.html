@@ -202,6 +202,16 @@
             <option value="2">2×</option>
             <option value="5">5×</option>
         </select>
+    <h2>AI connectors</h2>
+    <p class="canvas-list-note">Tokens let AI tools such as Claude read and edit your canvases as you. Treat a token like a password.</p>
+    <ul id="api-token-list" class="api-token-list"></ul>
+    <p><button id="api-token-create" type="button">Create token</button></p>
+    <div id="api-token-new" class="api-token-new" hidden>
+        <p>Copy this token now. It won't be shown again.</p>
+        <p><label for="api-token-value">Token</label>
+            <input id="api-token-value" type="text" readonly>
+        <p><button id="api-token-copy" type="button">Copy token</button>
+    </div>
     <h2>Diagnostics &amp; Troubleshooting</h2>
     <p><button id="settings-diagnostics" type="button">View diagnostics &amp; error logs</button></p>
     <div class="dialog-actions">
