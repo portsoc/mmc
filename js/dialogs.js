@@ -124,12 +124,27 @@ export function wireAppMenu() {
     menuBtn.setAttribute('aria-expanded', String(open));
   }
 
-  menuBtn.addEventListener('click', () => setOpen(menu.hidden));
+  menuBtn.addEventListener('click', () => {
+    const opening = menu.hidden;
+    setOpen(opening);
+    // Keyboard users land on the first item; Tab then walks the list.
+    if (opening) menu.querySelector('.app-menu-item:not([hidden])')?.focus({ preventScroll: true });
+  });
   document.addEventListener('click', (e) => {
     if (!menu.hidden && !menu.contains(e.target) && !menuBtn.contains(e.target)) setOpen(false);
   });
   menu.addEventListener('click', (e) => {
     if (e.target.closest('.app-menu-item')) setOpen(false);
+  });
+  menu.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    e.stopPropagation(); // don't also trigger the page-level Escape handling
+    setOpen(false);
+    menuBtn.focus();
+  });
+  // Tabbing out of the menu closes it rather than leaving it floating open.
+  menu.addEventListener('focusout', (e) => {
+    if (e.relatedTarget && !menu.contains(e.relatedTarget) && e.relatedTarget !== menuBtn) setOpen(false);
   });
 }
 

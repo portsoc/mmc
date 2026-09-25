@@ -415,7 +415,6 @@ dialog button {
 dialog button:hover,
 dialog button:focus-visible {
     box-shadow: var(--elevation-1);
-    outline: none;
 }
 
 .key {
@@ -452,6 +451,24 @@ strong {
     min-width: 5em;
     outline: none;
     cursor: text;
+}
+
+/* One keyboard focus ring for everything outside the sections (which show
+   focus with the grey edge on .grid-item); same grey, never the accent. */
+#title:focus-visible,
+#by:focus-visible,
+h2 img:focus-visible,
+.icon-btn:focus-visible,
+.app-menu-item:focus-visible,
+.btn-filled:focus-visible,
+dialog button:focus-visible {
+    outline: 2px solid var(--outline);
+    outline-offset: 2px;
+    border-radius: var(--radius-s);
+}
+
+.icon-btn:focus-visible {
+    border-radius: 50%;
 }
 
 /* Focus mode: enlarged panel view */
@@ -598,7 +615,6 @@ strong {
 .btn-filled:hover,
 .btn-filled:focus-visible {
     box-shadow: var(--elevation-2);
-    outline: none;
 }
 
 .btn-filled:active {
@@ -622,7 +638,6 @@ strong {
 .icon-btn:hover,
 .icon-btn:focus-visible {
     background: var(--surface-variant);
-    outline: none;
 }
 
 /* Collaboration toolbar + hamburger menu */
@@ -673,7 +688,6 @@ strong {
 .app-menu-item:hover,
 .app-menu-item:focus-visible {
     background: var(--surface-variant);
-    outline: none;
 }
 
 .presence-avatars {
