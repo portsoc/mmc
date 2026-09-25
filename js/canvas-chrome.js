@@ -1,3 +1,5 @@
+// Canvas chrome: section click/defocus, URL-fragment presentation,
+// Escape handling, the focus modal and the help dialog.
 const el = {};
 const mmc = {
   current: []
@@ -149,7 +151,7 @@ function wireSwipeToDismiss(dialog) {
   dialog.addEventListener('touchcancel', endSwipe, { passive: true });
 }
 
-function prep() {
+export function initCanvasChrome() {
   el.gridItems = document.querySelectorAll('.grid-item');
   el.editableElements = document.querySelectorAll('[contenteditable]');
   el.help = document.querySelector('#help');
@@ -258,9 +260,20 @@ function openFocus(gridItem) {
   }, { once: true });
   dialog.showModal();
 
+  // A <li> can't take focus itself; focus the editable list and put the
+  // caret at the end of its last line, so typing goes straight in.
   const list = editable.querySelector('.canvas-list');
-  const targetLi = list?.querySelector('li') || editable;
-  targetLi?.focus();
+  const target = list || editable;
+  target.focus();
+  const lastLine = list?.querySelector('li:last-child');
+  const sel = window.getSelection();
+  if (lastLine && sel) {
+    const range = document.createRange();
+    range.selectNodeContents(lastLine);
+    range.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
 }
 
 function openUsageDialog() {
@@ -270,6 +283,3 @@ function openUsageDialog() {
     dialog.close();
   });
 }
-
-window.addEventListener('load', prep);
-

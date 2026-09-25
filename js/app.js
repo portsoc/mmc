@@ -1,12 +1,12 @@
 // WP08 — Wires collaboration modules (auth, canvas-data, collab, versions,
 // metrics, playback) to the toolbar and dialogs added to index.html.
 //
-// This runs alongside the legacy script.js (local-storage editing, defocus,
-// hash presentation) unchanged — see WP09 for the migration path between
-// the two. Everything here degrades to a no-op if Firebase isn't reachable
+// Section chrome (defocus, focus modal, help) lives in canvas-chrome.js.
+// Everything here degrades to a no-op if Firebase isn't reachable
 // (e.g. firebase-config.js still has placeholder credentials), so the
 // vanilla local-only canvas keeps working per the "graceful fallback"
 // design invariant.
+import { initCanvasChrome } from './canvas-chrome.js';
 import { initAuth, currentUser, onUser, signInWithGoogle, signOutUser, firstName } from './auth.js';
 import { functions, onRtdbConnectionChange } from './firebase-config.js';
 import { httpsCallable } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-functions.js';
@@ -1021,4 +1021,5 @@ async function init() {
 
 // Module scripts run after the DOM is parsed, so no need to wait for every
 // image to finish loading before starting auth and data fetches.
+initCanvasChrome();
 init();
