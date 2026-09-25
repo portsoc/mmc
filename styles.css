@@ -547,6 +547,9 @@ dialog button:focus-visible {
     display: flex;
     flex-direction: column;
     padding-block-start: var(--space-3);
+    /* Room for row outlines (up to 2px + 2px offset), which the scroll box would clip. */
+    padding-inline: 6px;
+    padding-block-end: 6px;
     min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
