@@ -1263,15 +1263,15 @@ a.app-menu-item {
 .canvas-list li::before {
     content: attr(data-bullet);
     position: absolute;
-    left: 0.15em;
-    top: 0.32em;
+    left: 0.38em;
+    top: 0.63em;
     width: 1.1em;
     text-align: center;
     user-select: none;
     -webkit-user-select: none;
     touch-action: none;
     cursor: pointer;
-    font-size: 0.72em;
+    font-size: 0.54em;
     line-height: 1.2;
     transition: transform 0.12s ease;
 }
