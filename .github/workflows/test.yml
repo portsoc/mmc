@@ -15,3 +15,4 @@ jobs:
       - run: npm ci --prefix test
       - run: npm --prefix test run test:unit
       - run: npx -y firebase-tools@latest emulators:exec --only firestore --project demo-mmc "npm --prefix test run test:rules"
+      - run: npx -y firebase-tools@latest emulators:exec --only database --project demo-mmc "npm --prefix test run test:rtdb"

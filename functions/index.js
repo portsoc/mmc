@@ -7,6 +7,7 @@ module.exports = {
   ...require('./invites'),
   ...require('./snapshots'),
   ...require('./canvases'),
-  ...require('./errors')
+  ...require('./errors'),
+  mirrorCanvasAccess: require('./access').mirrorCanvasAccess
 };
 

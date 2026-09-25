@@ -1,15 +1,22 @@
 {
   "rules": {
+    "access": {
+      ".read": false,
+      ".write": false
+    },
     "sessions": {
       "$canvasId": {
         "updates": {
-          ".read": "auth != null",
-          ".write": "auth != null"
+          ".read": "auth != null && root.child('access/' + $canvasId + '/roles/' + auth.uid).exists()",
+          "$updateId": {
+            ".write": "auth != null && !data.exists() && newData.exists() && root.child('access/' + $canvasId + '/binned').val() !== true && (root.child('access/' + $canvasId + '/roles/' + auth.uid).val() === 'owner' || root.child('access/' + $canvasId + '/roles/' + auth.uid).val() === 'editor')",
+            ".validate": "newData.hasChildren(['clientId', 'data', 'ts'])"
+          }
         },
         "awareness": {
+          ".read": "auth != null && root.child('access/' + $canvasId + '/roles/' + auth.uid).exists()",
           "$uid": {
-            ".read": "auth != null",
-            ".write": "auth != null && auth.uid === $uid"
+            ".write": "auth != null && auth.uid === $uid && root.child('access/' + $canvasId + '/roles/' + auth.uid).exists()"
           }
         }
       }

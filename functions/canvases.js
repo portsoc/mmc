@@ -5,6 +5,7 @@ const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const { getDatabase } = require('firebase-admin/database');
 const { randomUUID } = require('crypto');
+const { syncAccess } = require('./access');
 
 const FIELD_IDS = ['mmd', 'by', 'kp', 'ka', 'vp', 'bs', 'be', 'kr', 'de', 'mb', 'if'];
 
@@ -37,6 +38,10 @@ exports.createCanvas = onCall(async (request) => {
     active: true
   });
 
+  // Written here as well as by the trigger so the owner can edit live as soon
+  // as the canvas opens, without waiting for the trigger to catch up.
+  await syncAccess(canvasRef.id, { roles: { [uid]: 'owner' } });
+
   return { id: canvasRef.id };
 });
 
@@ -55,6 +60,7 @@ exports.emptyBin = onCall(async (request) => {
     const token = snap.get('readOnlyToken');
     if (token) await db.doc(`public_tokens/${token}`).delete();
     await getDatabase().ref(`sessions/${snap.id}`).remove();
+    await syncAccess(snap.id, null);
     await db.recursiveDelete(snap.ref);
   }));
 

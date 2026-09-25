@@ -4,6 +4,7 @@
 // role it doesn't have yet.
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+const { syncAccess } = require('./access');
 
 exports.redeemInvite = onCall(async (request) => {
   const uid = request.auth?.uid;
@@ -18,7 +19,7 @@ exports.redeemInvite = onCall(async (request) => {
   const inviteRef = db.doc(`canvases/${canvasId}/invites/${inviteId}`);
   const canvasRef = db.doc(`canvases/${canvasId}`);
 
-  return db.runTransaction(async (tx) => {
+  const result = await db.runTransaction(async (tx) => {
     const inviteSnap = await tx.get(inviteRef);
     if (!inviteSnap.exists) throw new HttpsError('not-found', 'Invite not found.');
 
@@ -38,4 +39,8 @@ exports.redeemInvite = onCall(async (request) => {
 
     return { role: invite.role };
   });
+
+  // So the new collaborator can edit live straight away (see access.js).
+  await syncAccess(canvasId, (await canvasRef.get()).data());
+  return result;
 });
