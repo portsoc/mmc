@@ -585,14 +585,45 @@ function wireHistory() {
   };
 }
 
+// The saved copy in Firestore is derived from the merged live doc, not from
+// one editor's view, and written once edits pause rather than per keystroke —
+// otherwise concurrent typists overwrite each other's latest edit there.
+const SAVE_DELAY_MS = 2000;
+const pendingSaves = new Map(); // fieldId -> fallback value if there is no live doc
+let saveTimer = null;
+
+function scheduleSave(fieldId, fallback) {
+  pendingSaves.set(fieldId, fallback);
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(flushSaves, SAVE_DELAY_MS);
+}
+
+function flushSaves() {
+  clearTimeout(saveTimer);
+  saveTimer = null;
+  if (!state.canvasId || state.readOnly) return pendingSaves.clear();
+  for (const [fieldId, fallback] of pendingSaves) {
+    const yarr = state.collab?.yItems?.[fieldId];
+    const ytext = state.collab?.yFields?.[fieldId];
+    const save = Array.isArray(fallback)
+      ? updateSectionItems(state.canvasId, fieldId, yarr ? itemsFromY(yarr) : fallback)
+      : updateField(state.canvasId, fieldId, ytext ? ytext.toString() : fallback);
+    save.catch((err) => console.warn('[app] saving', fieldId, 'failed:', err));
+  }
+  pendingSaves.clear();
+}
+
+addEventListener('pagehide', flushSaves);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flushSaves();
+});
+
 function initRaggedLinks(els) {
   if (!els) return;
   state.raggedLinks = new RaggedLinksController(els, (fieldId, items, newText) => {
     if (state.canvasId && !state.readOnly) {
-      updateSectionItems(state.canvasId, fieldId, items).catch((err) => {
-        console.warn('[app] updateSectionItems failed:', err);
-      });
       applyLocalItems(state.collab, fieldId, items);
+      scheduleSave(fieldId, items);
       if (currentUser.value) {
         recordEdit(state.canvasId, fieldId, currentUser.value.uid, firstName(currentUser.value), newText.length);
       }
@@ -925,9 +956,7 @@ async function init() {
       const el = els[fieldId];
       el?.addEventListener('input', (e) => {
         const text = e.target.textContent || '';
-        updateField(state.canvasId, fieldId, text).catch((err) => {
-          console.warn('[app] updateField failed:', err);
-        });
+        scheduleSave(fieldId, text);
         if (currentUser.value) {
           recordEdit(state.canvasId, fieldId, currentUser.value.uid, firstName(currentUser.value), text.length);
         }
