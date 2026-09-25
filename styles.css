@@ -502,7 +502,7 @@ dialog button:focus-visible {
 ::view-transition-group(mmc-focus-head),
 ::view-transition-group(mmc-focus-text),
 ::view-transition-group(root) {
-    animation-duration: 280ms;
+    animation-duration: 420ms;
     animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
 }
 /* Keep the text at its real size, pinned top-left, while its box resizes. */
