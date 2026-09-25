@@ -28,8 +28,6 @@ import {
 } from './canvas-data.js';
 import { applyLocalItems, bindCollaborativeFields, colorForUser, itemsFromY } from './collab.js';
 import { createWaypoint, maybeCreateDailySnapshot } from './versions.js';
-import { recordEdit, getContributionMetrics } from './metrics.js';
-import { changedChars } from './text-diff.js';
 import { canEdit, isOwner } from './roles.js';
 import { showCanvasList, showCanvasListSkeleton, showCanvasListError } from './canvas-list.js';
 import { RaggedLinksController } from './ragged-links.js';
@@ -39,6 +37,7 @@ import { errorReporter } from './error-reporter.js';
 import { syncFeedback, toastManager } from './feedback.js';
 import { FIELD_ELEMENT_IDS, state, prefs, savePrefs, elementsById } from './app-state.js';
 import { wireHistory } from './history-panel.js';
+import { refreshContributorHighlight, wireEditMetrics, wireMetricsModal } from './contributors.js';
 
 /** Browsers leave a stray <br> behind when a contenteditable is emptied,
  * which defeats the :empty placeholder, so strip it. Also mirrors the
@@ -336,93 +335,6 @@ function wireNameVersion(onSaved) {
       saveBtn.disabled = false;
     }
   });
-}
-
-function applyContributorHighlight(metrics) {
-  const els = elementsById();
-  const attribution = metrics?.fieldAttribution || {};
-  for (const [fieldId, el] of Object.entries(els)) {
-    if (!el) continue;
-    const byUid = attribution[fieldId] || {};
-    const topUid = Object.keys(byUid).sort((a, b) => byUid[b] - byUid[a])[0];
-    el.style.borderLeftColor = topUid ? colorForUser(topUid) : '';
-    el.classList.toggle('contributor-highlighted', !!topUid);
-  }
-}
-
-function clearContributorHighlight() {
-  for (const el of Object.values(elementsById())) {
-    el?.classList.remove('contributor-highlighted');
-    if (el) el.style.borderLeftColor = '';
-  }
-}
-
-async function refreshContributorHighlight() {
-  if (!prefs.highlightContributors || !state.canvasId) {
-    clearContributorHighlight();
-    return;
-  }
-  try {
-    applyContributorHighlight(await getContributionMetrics(state.canvasId));
-  } catch (err) {
-    console.warn('[app] Contributor metrics unavailable:', err.message);
-  }
-}
-
-/** Credit each local edit with the characters it changed. beforeinput/input
- * fire only for this user's typing, so collaborators' edits aren't counted. */
-function wireEditMetrics() {
-  const fieldOf = (target) => {
-    for (const [fieldId, domId] of Object.entries(FIELD_ELEMENT_IDS)) {
-      if (target?.closest?.(`#${domId}`)) return [fieldId, document.getElementById(domId)];
-    }
-    return [null, null];
-  };
-  let before = null; // { fieldId, text }
-  document.addEventListener('beforeinput', (e) => {
-    const [fieldId, el] = fieldOf(e.target);
-    before = fieldId ? { fieldId, text: el.textContent || '' } : null;
-  });
-  document.addEventListener('input', (e) => {
-    const [fieldId, el] = fieldOf(e.target);
-    if (!fieldId || before?.fieldId !== fieldId) return;
-    const chars = changedChars(before.text, el.textContent || '');
-    before = null;
-    if (chars && state.canvasId && !state.readOnly && currentUser.value) {
-      recordEdit(state.canvasId, fieldId, currentUser.value.uid, firstName(currentUser.value), chars);
-    }
-  });
-}
-
-function wireMetricsModal() {
-  const modal = document.getElementById('metrics-modal');
-  document.getElementById('metrics-btn')?.addEventListener('click', async () => {
-    if (!state.canvasId) return;
-    renderMetrics(await getContributionMetrics(state.canvasId));
-    modal.showModal();
-  });
-  document.getElementById('metrics-close')?.addEventListener('click', () => modal.close());
-}
-
-function renderMetrics(metrics) {
-  const bar = document.getElementById('metrics-bar');
-  const list = document.getElementById('metrics-leaderboard');
-  bar.innerHTML = '';
-  list.innerHTML = '';
-  if (!metrics) return;
-
-  const contributors = Object.entries(metrics.contributors || {}).sort((a, b) => b[1].wordsContributed - a[1].wordsContributed);
-  for (const [uid, c] of contributors) {
-    const segment = document.createElement('div');
-    segment.className = 'metrics-bar-segment';
-    segment.style.width = `${c.percentage}%`;
-    segment.style.background = c.avatarColor || colorForUser(uid);
-    bar.appendChild(segment);
-
-    const item = document.createElement('li');
-    item.textContent = `${c.name} — ${c.percentage}% (${c.wordsContributed} words, ${c.editCount} edits)`;
-    list.appendChild(item);
-  }
 }
 
 // The saved copy in Firestore is derived from the merged live doc, not from

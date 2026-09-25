@@ -54,3 +54,15 @@ test('a named version appears in history, is shown read-only, and closing return
   await expect(page.locator('#ekp')).toContainText('before after');
   await expect(page.locator('#ekp')).toHaveAttribute('contenteditable', 'plaintext-only');
 });
+
+test('contributors lists the person who typed', async ({ page }) => {
+  await openNewCanvas(page, testEmail('contrib'));
+  await page.locator('#ekp').click();
+  await page.keyboard.type('hello world');
+  await page.waitForTimeout(5000); // edit credits flush 4s after typing pauses
+  await page.locator('#menu-btn').click();
+  await page.locator('#metrics-btn').click();
+  await expect(page.locator('#metrics-modal')).toBeVisible();
+  await expect(page.locator('#metrics-leaderboard li')).toHaveCount(1);
+  await expect(page.locator('#metrics-leaderboard li')).toContainText('contrib');
+});
