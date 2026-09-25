@@ -66,3 +66,21 @@ test('contributors lists the person who typed', async ({ page }) => {
   await expect(page.locator('#metrics-leaderboard li')).toHaveCount(1);
   await expect(page.locator('#metrics-leaderboard li')).toContainText('contrib');
 });
+
+test('right-clicking a bullet opens the style popup, and a chosen colour survives reload', async ({ page }) => {
+  await openNewCanvas(page, testEmail('popup'));
+  await page.locator('#ekp').click();
+  await page.keyboard.type('coloured line');
+  const li = page.locator('#ekp li').first();
+  await li.click({ button: 'right', position: { x: 4, y: 8 } });
+  const popup = page.locator('.bullet-popup');
+  await expect(popup).toBeVisible();
+  const swatch = popup.locator('.bullet-swatch-btn:not(.clear-swatch)').first();
+  const colour = await swatch.getAttribute('data-color');
+  await swatch.click();
+  await expect(popup).toBeHidden();
+  await expect(li).toHaveAttribute('data-color', colour);
+  await page.waitForTimeout(3000); // let the debounced save flush
+  await page.reload();
+  await expect(page.locator('#ekp li').first()).toHaveAttribute('data-color', colour);
+});
