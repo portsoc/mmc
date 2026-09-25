@@ -5,7 +5,8 @@
   "scripts": {
     "test:rules": "mocha firestore-rules.test.js --timeout 20000",
     "test:rtdb": "mocha database-rules.test.js --timeout 20000",
-    "test:unit": "node --test unit/*.test.js"
+    "test:unit": "node --test unit/*.test.js",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.0",
