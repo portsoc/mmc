@@ -1,0 +1,63 @@
+{
+  "hosting": {
+    "target": "mmcedit",
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "work-packages/**",
+      "functions/**",
+      "test/**",
+      "AGENTS.md"
+    ],
+    "rewrites": [
+      {
+        "source": "/view/**",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/canvas/**",
+        "destination": "/index.html"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(html|js)",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache" }
+        ]
+      },
+      {
+        "source": "**/*.@(css|png|jpg|jpeg|svg|ico)",
+        "headers": [
+          { "key": "Cache-Control", "value": "max-age=3600" }
+        ]
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "database": {
+    "rules": "database.rules.json"
+  },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs20"
+  },
+  "emulators": {
+    "auth": { "port": 9099 },
+    "firestore": { "port": 8180 },
+    "database": { "port": 9000 },
+    "functions": { "port": 5001 },
+    "hosting": { "port": 5000 },
+    "ui": { "enabled": true, "port": 4000 },
+    "singleProjectMode": true
+  }
+}

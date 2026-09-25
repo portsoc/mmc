@@ -1,0 +1,249 @@
+// Feedback Module — Real-time Sync Status indicator and accessible Toast notifications.
+// Designed with zero dependencies and adhering to Portsmouth MMC design rules.
+
+function getNavigatorOnline() {
+  if (typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean') {
+    return navigator.onLine;
+  }
+  return true;
+}
+
+export class SyncFeedbackManager {
+  constructor(options = {}) {
+    this.statusEl = null;
+    this.state = 'synced'; // 'synced' | 'saving' | 'offline' | 'error'
+    this.inFlightSaves = 0;
+    this.isOnline = getNavigatorOnline();
+    this.isRtdbConnected = true;
+    this.lastError = null;
+    this.onStatusClick = options.onStatusClick || null;
+
+    if (options.autoInit !== false && typeof window !== 'undefined') {
+      this.initNetworkListeners();
+    }
+  }
+
+  bindElement(el) {
+    this.statusEl = el;
+    if (this.statusEl) {
+      this.statusEl.addEventListener('click', () => {
+        if (this.onStatusClick) {
+          this.onStatusClick(this.state, this.lastError);
+        }
+      });
+      this.render();
+    }
+  }
+
+  initNetworkListeners() {
+    if (typeof window === 'undefined') return;
+
+    window.addEventListener('online', () => {
+      this.setOnline(true);
+    });
+
+    window.addEventListener('offline', () => {
+      this.setOnline(false);
+    });
+  }
+
+  setOnline(online) {
+    const wasOnline = this.isOnline;
+    this.isOnline = Boolean(online);
+
+    if (!this.isOnline) {
+      this.state = 'offline';
+    } else if (!wasOnline) {
+      // Transitioning from offline to online
+      if (this.inFlightSaves > 0) {
+        this.state = 'saving';
+      } else {
+        this.state = 'synced';
+      }
+    }
+    this.render();
+  }
+
+  setRtdbConnected(connected) {
+    this.isRtdbConnected = Boolean(connected);
+    if (!this.isRtdbConnected && this.isOnline) {
+      // Browser says online, but socket is currently disconnected
+      // We can indicate reconnecting if we aren't already saving/offline/error
+    }
+    this.render();
+  }
+
+  startSave() {
+    this.inFlightSaves += 1;
+    if (this.isOnline) {
+      this.state = 'saving';
+      this.lastError = null;
+    } else {
+      this.state = 'offline';
+    }
+    this.render();
+  }
+
+  finishSave() {
+    this.inFlightSaves = Math.max(0, this.inFlightSaves - 1);
+    if (!this.isOnline) {
+      this.state = 'offline';
+    } else if (this.inFlightSaves === 0 && this.state === 'saving') {
+      this.state = 'synced';
+      this.lastError = null;
+    }
+    this.render();
+  }
+
+  failSave(error) {
+    this.inFlightSaves = Math.max(0, this.inFlightSaves - 1);
+    this.lastError = error;
+    if (!this.isOnline) {
+      this.state = 'offline';
+    } else {
+      this.state = 'error';
+    }
+    this.render();
+  }
+
+  clearError() {
+    this.lastError = null;
+    if (!this.isOnline) {
+      this.state = 'offline';
+    } else if (this.inFlightSaves > 0) {
+      this.state = 'saving';
+    } else {
+      this.state = 'synced';
+    }
+    this.render();
+  }
+
+  render() {
+    if (!this.statusEl) return;
+
+    this.statusEl.className = `sync-status sync-${this.state}`;
+    this.statusEl.setAttribute('data-state', this.state);
+
+    let html = '';
+    let title = '';
+
+    switch (this.state) {
+      case 'saving':
+        html = `<span class="sync-dot saving" aria-hidden="true"></span><span class="sync-label">Saving…</span>`;
+        title = 'Saving changes to cloud…';
+        break;
+      case 'offline':
+        html = `<svg class="sync-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 1l22 22M16.5 16.5H5a4 4 0 0 1 0-8c.4 0 .8.1 1.2.2a6 6 0 0 1 10.3 2.3M19.4 14.5A4.5 4.5 0 0 0 19 9a5 5 0 0 0-4-2.8"/></svg><span class="sync-label">Offline (saved locally)</span>`;
+        title = 'You are currently offline. Edits are safely buffered in local storage.';
+        break;
+      case 'error':
+        html = `<svg class="sync-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 8v4m0 4v.01M10.3 2.8l-8.6 15A2 2 0 0 0 3.4 21h17.2a2 2 0 0 0 1.7-3.2l-8.6-15a2 2 0 0 0-3.4 0z"/></svg><span class="sync-label">Sync error</span>`;
+        title = `Sync error: ${this.lastError?.message || 'Click for diagnostics and retry'}`;
+        break;
+      case 'synced':
+      default:
+        html = `<span class="sync-dot synced" aria-hidden="true"></span><span class="sync-label">Saved</span>`;
+        title = 'All changes saved to cloud.';
+        break;
+    }
+
+    this.statusEl.innerHTML = html;
+    this.statusEl.setAttribute('title', title);
+  }
+}
+
+export class ToastManager {
+  constructor(containerEl = null) {
+    this.container = containerEl;
+  }
+
+  setContainer(containerEl) {
+    this.container = containerEl;
+  }
+
+  show({ message, type = 'info', duration = 4000, action = null }) {
+    if (!this.container && typeof document !== 'undefined') {
+      this.container = document.getElementById('toast-container');
+    }
+    if (!this.container || typeof document === 'undefined') {
+      return { dismiss: () => {} };
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast-card toast-${type}`;
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+
+    const msgSpan = document.createElement('span');
+    msgSpan.className = 'toast-message';
+    msgSpan.textContent = message;
+    toast.appendChild(msgSpan);
+
+    if (action && action.label && action.onClick) {
+      const actionBtn = document.createElement('button');
+      actionBtn.type = 'button';
+      actionBtn.className = 'toast-action-btn';
+      actionBtn.textContent = action.label;
+      actionBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        try {
+          action.onClick();
+        } finally {
+          dismiss();
+        }
+      });
+      toast.appendChild(actionBtn);
+    }
+
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'toast-close-btn';
+    closeBtn.setAttribute('aria-label', 'Dismiss notification');
+    closeBtn.innerHTML = '&times;';
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dismiss();
+    });
+    toast.appendChild(closeBtn);
+
+    let dismissed = false;
+    let timer = null;
+
+    const dismiss = () => {
+      if (dismissed) return;
+      dismissed = true;
+      if (timer) clearTimeout(timer);
+      toast.classList.add('toast-dismissing');
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 300);
+    };
+
+    if (duration > 0) {
+      timer = setTimeout(dismiss, duration);
+    }
+
+    this.container.appendChild(toast);
+    return { dismiss };
+  }
+
+  info(message, opts = {}) {
+    return this.show({ message, type: 'info', ...opts });
+  }
+
+  success(message, opts = {}) {
+    return this.show({ message, type: 'success', ...opts });
+  }
+
+  warning(message, opts = {}) {
+    return this.show({ message, type: 'warning', ...opts });
+  }
+
+  error(message, opts = {}) {
+    return this.show({ message, type: 'error', duration: opts.duration ?? 8000, ...opts });
+  }
+}
+
+export const syncFeedback = new SyncFeedbackManager();
+export const toastManager = new ToastManager();

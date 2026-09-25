@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="34px" height="34px" viewBox="-1 0 39 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" stroke="#000000" stroke-width="1.25">
-    <path id="wheel1" d="M12.17,19.47 C14.41,19.47 16.23,21.29 16.23,23.53 C16.23,25.77 14.41,27.59 12.17,27.59 C9.93,27.59 8.11,25.77 8.11,23.53 C8.11,21.29 9.93,19.47 12.17,19.47 Z" stroke-linecap="round" stroke-linejoin="round"></path>
-    <path id="wheel2" d="M30.03,19.47 C32.27,19.47 34.08,21.29 34.08,23.53 C34.08,25.77 32.27,27.59 30.03,27.59 C27.78,27.59 25.97,25.77 25.97,23.53 C25.97,21.29 27.78,19.47 30.03,19.47 Z" stroke-linecap="round" stroke-linejoin="round"></path>
-    <polyline id="box" stroke-linecap="square" points="12.98 16.23 12.98 -2.844e-14 37.33 -2.844e-14 37.33 22.72 34.08 22.725"></polyline>
-    <line id="safetybar" x1="16.23" y1="22.725" x2="25.97" y2="22.725" stroke-linecap="square"></line>
-    <path id="cab" d="M7.28,24.34 L0,24.34 L0,12.98 C4.73,5.98 2.90,6.49 6.49,6.49 L12.98,6.49" stroke-linecap="square"></path>
-    <path id="glass" d="M0,13.79 L6.49,13.79 C7.38,13.79 8.11,13.07 8.11,12.17 L8.11,6.49" stroke-linecap="square"></path>
-    <line id="fender" x1="0" y1="21.10" x2="8.116" y2="21.10" stroke-linecap="square"></line>
+<svg width="34px" height="34px" viewBox="-1 0 39 30" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <!-- Cargo Box -->
+    <polygon points="12.98 22.72 12.98 0 37.33 0 37.33 22.72 12.98 22.72"
+             fill="#0284C7" stroke="#0369A1" stroke-width="1.25" stroke-linejoin="round"></polygon>
+    <!-- Cab -->
+    <path id="cab" d="M7.28,24.34 L0,24.34 L0,12.98 C4.73,5.98 2.90,6.49 6.49,6.49 L12.98,6.49 Z"
+          fill="#0EA5E9" stroke="#0284C7" stroke-width="1.25" stroke-linejoin="round"></path>
+    <!-- Windshield -->
+    <path id="glass" d="M0,13.79 L6.49,13.79 C7.38,13.79 8.11,13.07 8.11,12.17 L8.11,6.49 Z"
+          fill="#BAE6FD" stroke="#0284C7" stroke-width="1.25" stroke-linejoin="round"></path>
+    <!-- Underbody details -->
+    <line id="fender" x1="0" y1="21.10" x2="8.116" y2="21.10" stroke="#334155" stroke-width="1.5" stroke-linecap="round"></line>
+    <line id="safetybar" x1="16.23" y1="22.725" x2="25.97" y2="22.725" stroke="#475569" stroke-width="2" stroke-linecap="round"></line>
+    <!-- Wheels -->
+    <path id="wheel1" d="M12.17,19.47 C14.41,19.47 16.23,21.29 16.23,23.53 C16.23,25.77 14.41,27.59 12.17,27.59 C9.93,27.59 8.11,25.77 8.11,23.53 C8.11,21.29 9.93,19.47 12.17,19.47 Z"
+          fill="#1E293B" stroke="#0F172A" stroke-width="1.5"></path>
+    <circle cx="12.17" cy="23.53" r="1.5" fill="#E2E8F0"></circle>
+    <path id="wheel2" d="M30.03,19.47 C32.27,19.47 34.08,21.29 34.08,23.53 C34.08,25.77 32.27,27.59 30.03,27.59 C27.78,27.59 25.97,25.77 25.97,23.53 C25.97,21.29 27.78,19.47 30.03,19.47 Z"
+          fill="#1E293B" stroke="#0F172A" stroke-width="1.5"></path>
+    <circle cx="30.03" cy="23.53" r="1.5" fill="#E2E8F0"></circle>
 </svg>

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="34px" height="34px" viewBox="-1 -1 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-    stroke="#000000" stroke-width="1.25" fill="none" fill-rule="evenodd" stroke-linecap="square">
-    <path d="M19.26,25.70 C15.98,30.51 9.42,31.76 4.61,28.48 C-0.20,25.20 -1.44,18.64 1.82,13.83 C5.10,9.02 11.66,7.77 16.47,11.05 C18.40,12.36 19.83,14.26 20.56,16.47"></path>
-    <path d="M11.05,4.61 C14.32,-0.20 20.88,-1.44 25.70,1.82 C30.51,5.10 31.76,11.66 28.48,16.47 C25.21,21.29 18.65,22.53 13.83,19.26 C11.91,17.95 10.47,16.04 9.75,13.84"></path>
+<svg width="34px" height="34px" viewBox="-1 -1 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="10.5" cy="20.5" r="8.5" fill="#3B82F6" fill-opacity="0.18"></circle>
+    <circle cx="19.5" cy="9.5" r="8.5" fill="#F97316" fill-opacity="0.18"></circle>
+    <path d="M19.26,25.70 C15.98,30.51 9.42,31.76 4.61,28.48 C-0.20,25.20 -1.44,18.64 1.82,13.83 C5.10,9.02 11.66,7.77 16.47,11.05 C18.40,12.36 19.83,14.26 20.56,16.47"
+          stroke="#2563EB" stroke-width="2.5" fill="none" stroke-linecap="round"></path>
+    <path d="M11.05,4.61 C14.32,-0.20 20.88,-1.44 25.70,1.82 C30.51,5.10 31.76,11.66 28.48,16.47 C25.21,21.29 18.65,22.53 13.83,19.26 C11.91,17.95 10.47,16.04 9.75,13.84"
+          stroke="#F97316" stroke-width="2.5" fill="none" stroke-linecap="round"></path>
 </svg>

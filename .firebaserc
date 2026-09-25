@@ -1,0 +1,19 @@
+{
+  "projects": {
+    "default": "mission-mmc-4476",
+    "production": "mission-mmc-4476"
+  },
+  "targets": {
+    "mission-mmc-4476": {
+      "hosting": {
+        "mmceditor": [
+          "mmceditor"
+        ],
+        "mmcedit": [
+          "mmcedit"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

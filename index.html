@@ -1,52 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
-
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="styles.css">
-<script defer src="script.js"></script>
+<link rel="stylesheet" href="/styles.css">
+<script defer src="/script.js"></script>
+<script type="module" defer src="/js/app.js"></script>
 <title>Portsmouth MMC</title>
+</head>
+<body>
+<div id="login-gate" class="login-gate" hidden>
+    <div class="login-card">
+        <h1>The Mission Model Canvas</h1>
+        <p>Sign in to view and edit shared canvases.</p>
+        <button id="login-google-btn" type="button" class="btn-filled">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.48a5.54 5.54 0 0 1-2.4 3.64v3h3.88c2.27-2.09 3.56-5.17 3.56-8.83z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.9l-3.88-3c-1.08.72-2.45 1.15-4.05 1.15-3.11 0-5.75-2.1-6.69-4.93H1.3v3.1A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.31 14.32A7.2 7.2 0 0 1 4.93 12c0-.8.14-1.58.38-2.32v-3.1H1.3A12 12 0 0 0 0 12c0 1.94.46 3.77 1.3 5.42l4.01-3.1z"/><path fill="#EA4335" d="M12 4.75c1.76 0 3.34.6 4.58 1.79l3.44-3.44C17.94 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.3 6.58l4.01 3.1C6.25 6.85 8.89 4.75 12 4.75z"/></svg>
+            Sign in with Google
+        </button>
+        <p id="login-error" class="login-error" hidden></p>
+    </div>
+</div>
+<main id="canvas-list" class="canvas-list" hidden aria-labelledby="canvas-list-heading">
+    <div class="canvas-list-top">
+        <h1 id="canvas-list-heading">Your canvases</h1>
+        <a href="/new" class="btn-filled">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            New canvas
+        </a>
+    </div>
+    <ul id="canvas-list-items" class="canvas-list-items" aria-busy="true"></ul>
+    <p id="canvas-list-empty" class="canvas-list-note" hidden>No canvases yet. Start one with <strong>New canvas</strong>.</p>
+    <p id="canvas-list-error" class="canvas-list-note" hidden>Couldn't load your canvases. Reload the page to try again.</p>
+    <details id="canvas-bin" class="canvas-bin" hidden>
+        <summary>Bin (<span id="canvas-bin-count">0</span>)</summary>
+        <p class="canvas-list-note">Only you can restore these or delete them for good. A canvas in the bin is read-only and its public link is off.</p>
+        <ul id="canvas-bin-items" class="canvas-list-items"></ul>
+        <p class="canvas-list-note"><button id="canvas-bin-empty" type="button" class="link-btn">Empty bin</button></p>
+    </details>
+    <p class="canvas-list-note"><span id="canvas-list-user"></span> <button id="canvas-list-signout" type="button" class="link-btn">Sign out</button></p>
+</main>
+<p id="bin-notice" class="bin-notice" role="status" hidden><span id="bin-notice-text">This canvas is in the bin, so it can't be changed.</span> <button id="bin-notice-restore" type="button" class="link-btn" hidden>Restore it</button></p>
 
-<div class="grid-container">
+<div id="app-root" class="grid-container" data-loading aria-busy="true">
 
     <header>
-        <h1>The Mission Model Canvas</h1>
-        <div>
-            <label for="mmd">Mission/Problem Description</label>
-            <p id="mmd" contenteditable>edit</p>
+        <div class="title-block">
+            <h1><span id="title" contenteditable data-placeholder="title"></span></h1>
+            <p id="by" class="author" contenteditable data-placeholder="team" aria-label="Team name"></p>
         </div>
-        <div>
-            <label for="by">Designed by</label>
-            <p id="by" contenteditable>edit</p>
+        <div id="collab-toolbar" class="collab-toolbar">
+            <div id="sync-status" class="sync-status" aria-live="polite" role="status" title="Sync status"></div>
+            <div id="presence-avatars" class="presence-avatars" aria-label="Active collaborators"></div>
+            <button id="menu-btn" class="icon-btn" type="button" title="Menu" aria-label="Open menu" aria-haspopup="true" aria-expanded="false">
+                <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+            <nav id="app-menu" class="app-menu" hidden>
+                <a href="/new" class="app-menu-item" data-needs-account>
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    New canvas
+                </a>
+                <a href="/canvases" class="app-menu-item" data-needs-account>
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                    Your canvases
+                </a>
+                <hr data-needs-account>
+                <button id="name-version-btn" type="button" class="app-menu-item">
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4V3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                    Name this version…
+                </button>
+                <button id="history-btn" type="button" class="app-menu-item">
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    Version history
+                </button>
+                <button id="metrics-btn" type="button" class="app-menu-item">
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 20V10M12 20V4M20 20v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    Contributors
+                </button>
+                <button id="share-btn" type="button" class="app-menu-item">
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="18" cy="5" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="12" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="19" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8.2 10.8l7.6-4.6M8.2 13.2l7.6 4.6" stroke="currentColor" stroke-width="2"/></svg>
+                    Share &amp; invite
+                </button>
+                <hr>
+                <button id="settings-btn" type="button" class="app-menu-item">
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    Settings
+                </button>
+                <button id="diagnostics-btn" type="button" class="app-menu-item">
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    Diagnostics &amp; logs
+                </button>
+                <button id="help" type="button" class="app-menu-item">
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    Help
+                </button>
+            </nav>
         </div>
-        <img id="help" src="i/help.svg" alt="help">
     </header>
 
-    <div class="grid-item" id="kp"><h2 id="hkp">Key Partners <img aria-labelledby="hkp" src="i/kp.svg"></h2><section id="ekp" class="e" contenteditable="true"></section></div>
-    <div class="grid-item" id="ka"><h2 id="hka">Key Activities <img aria-labelledby="hka" src="i/ka.svg"></h2><section id="eka" class="e" contenteditable="true"></section></div>
-    <div class="grid-item" id="vp"><h2 id="hvp">Value Propositions <img aria-labelledby="hvp" src="i/vp.svg"></h2><section id="evp" class="e" contenteditable="true"></section></div>
-    <div class="grid-item" id="bs"><h2 id="hbs">Buy-in Support <img aria-labelledby="hbs" src="i/bs.svg"></h2><section id="ebs" class="e" contenteditable="true"></section></div>
-    <div class="grid-item" id="be"><h2 id="hbe">Beneficiaries <img aria-labelledby="hbe" src="i/be.svg"></h2><section id="ebe" class="e" contenteditable="true"></section></div>
-    <div class="grid-item" id="kr"><h2 id="hkr">Key Resources <img aria-labelledby="hkr" src="i/kr.svg"></h2><section id="ekr" class="e" contenteditable="true"></section></div>
-    <div class="grid-item" id="de"><h2 id="hde">Deployment <img aria-labelledby="hde" src="i/de.svg"></h2><section id="ede" class="e" contenteditable="true"></section></div>
-    <div class="grid-item" id="mb"><h2 id="hmb">Mission Budget/Cost <img aria-labelledby="hmb" src="i/mb.svg"></h2><section id="emb" class="e" contenteditable="true"></section></div>
-    <div class="grid-item" id="if"><h2 id="hif">Mission Achievement/Impact Factors <img aria-labelledby="hif" src="i/if.svg"></h2><section id="eif" class="e" contenteditable="true"></section></div>
-    <footer>
-        <p>This work is licensed under the <a href="https://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)</a>
-        <p><span>Designed by:</span> Strategyzer AG & Steve Blank.  Built for the web at Uni. of Portsmouth.
-    </footer>
+    <div class="grid-item" id="kp"><h2 id="hkp">Key Partners <img aria-labelledby="hkp" src="/i/kp.svg"></h2><section id="ekp" class="e" contenteditable="plaintext-only"></section></div>
+    <div class="grid-item" id="ka"><h2 id="hka">Key Activities <img aria-labelledby="hka" src="/i/ka.svg"></h2><section id="eka" class="e" contenteditable="plaintext-only"></section></div>
+    <div class="grid-item" id="vp"><h2 id="hvp">Value Propositions <img aria-labelledby="hvp" src="/i/vp.svg"></h2><section id="evp" class="e" contenteditable="plaintext-only"></section></div>
+    <div class="grid-item" id="bs"><h2 id="hbs">Buy-in Support <img aria-labelledby="hbs" src="/i/bs.svg"></h2><section id="ebs" class="e" contenteditable="plaintext-only"></section></div>
+    <div class="grid-item" id="be"><h2 id="hbe">Beneficiaries <img aria-labelledby="hbe" src="/i/be.svg"></h2><section id="ebe" class="e" contenteditable="plaintext-only"></section></div>
+    <div class="grid-item" id="kr"><h2 id="hkr">Key Resources <img aria-labelledby="hkr" src="/i/kr.svg"></h2><section id="ekr" class="e" contenteditable="plaintext-only"></section></div>
+    <div class="grid-item" id="de"><h2 id="hde">Deployment <img aria-labelledby="hde" src="/i/de.svg"></h2><section id="ede" class="e" contenteditable="plaintext-only"></section></div>
+    <div class="grid-item" id="mb"><h2 id="hmb">Mission Budget/Cost <img aria-labelledby="hmb" src="/i/mb.svg"></h2><section id="emb" class="e" contenteditable="plaintext-only"></section></div>
+    <div class="grid-item" id="if"><h2 id="hif">Mission Achievement/Impact Factors <img aria-labelledby="hif" src="/i/if.svg"></h2><section id="eif" class="e" contenteditable="plaintext-only"></section></div>
 </div>
 
+<dialog id="focus-modal" aria-labelledby="focus-title">
+    <div class="focus-bar">
+        <h1 id="focus-title"></h1>
+    </div>
+    <div id="focus-slot"></div>
+    <div class="focus-actions">
+        <button id="focus-close" type="button">Done</button>
+    </div>
+</dialog>
+
 <dialog id="usage">
-    <h1>Using the Mission Model Canvas.</h1>
-    <p>The MMC comprises nine sections ("Key Partners", "Key Activities", etc).
+    <h1>Using the Mission Model Canvas</h1>
+    <p>The canvas has nine sections ("Key Partners", "Key Activities", etc.) plus a title, description and team along the top.
     <h2>Editing</h2>
-    <p><strong>Click</strong> a section to begin editing it: a highlight will appear and you'll see a flashing caret where you can enter text.
+    <p><strong>Click</strong> a section and type. Everything saves automatically and appears for everyone on the canvas straight away.
     <p><strong>Click outside</strong> a section or press <span class="key">Escape</span> to stop editing.
-    <h2>Defocusing</h2>
-    <p><strong><span class="key">Shift</span>-click</strong> a section to defocus it (it will blend more into the background).
-    <p><strong>Type</strong> in any defocused area to automatically refocus it.
-    <h2>Reset</h2>
-    <p><span class="key">Ctrl</span>+<span class="key">Escape</span> opens a dialog that will allow you to remove all your text from the page.</p>
+    <p>Grey italic words such as <em>title</em> and <em>team</em> are only hints; just start typing.
+    <h2>Working together</h2>
+    <p>The coloured circles at the top show who else is on the canvas right now.
+    <p><strong>Share &amp; invite</strong> in the <strong>☰</strong> menu gives you a read-only link or invites someone to edit (canvas owner only).
+    <p><strong>Contributors</strong> shows who has written what.
+    <h2>Versions</h2>
+    <p><strong>Name this version…</strong> saves the canvas as it is now under a name you choose. A snapshot is also taken automatically each day.
+    <p><strong>Version history</strong> lists every version. Click one to see it on the canvas, or press ▶ to watch the canvas develop. The canvas is read-only while you look; close the list to return to the current version. The owner can restore an old version, and the current one is saved first so nothing is lost.
+    <h2>Focusing &amp; Maximising</h2>
+    <p><strong>Tap a section icon</strong> to open that section in an enlarged focus view. Tap the icon again, press <span class="key">Escape</span>, tap outside the card, or swipe down to close it.
+    <p><strong><span class="key">Shift</span>-click</strong> a section to fade it so the others stand out. Type in a faded section to bring it back. The page address remembers which sections are faded, so you can share a focused view.
+    <h2>Settings</h2>
+    <p>Your account, sign out, and display options such as highlighting sections by contributor and playback speed.
+    <footer class="credits">
+        <p><span>Designed by:</span> Strategyzer AG &amp; Steve Blank. Built for the web at Uni. of Portsmouth.
+        <p>This work is licensed under the <a href="https://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)</a>
+    </footer>
     <button id="usage-close">OK</button>
 </dialog>
+
+<dialog id="share-modal">
+    <h1>Share &amp; Invite</h1>
+    <h2>Read-only link</h2>
+    <p><label for="share-readonly-url">Link</label>
+        <input id="share-readonly-url" type="text" readonly>
+    <p><button id="share-copy-link" type="button">Copy Link</button>
+    <p><label><input id="share-public-toggle" type="checkbox">Allow anyone with this link to view</label>
+    <h2>Invite a collaborator</h2>
+    <p><label for="invite-email">Email</label>
+        <input id="invite-email" type="email" placeholder="student@port.ac.uk">
+    <p><label for="invite-role">Role</label>
+        <select id="invite-role">
+            <option value="editor">Editor</option>
+            <option value="viewer">Viewer</option>
+        </select>
+    <p><button id="invite-send" type="button">Send Invite</button>
+    <ul id="collaborator-list"></ul>
+    <button id="share-close">Close</button>
+</dialog>
+
+<dialog id="name-version-modal">
+    <h1>Name this version</h1>
+    <p>Saves the canvas as it is now, so you can find it in Version history.
+    <p><label for="version-name">Name</label>
+        <input id="version-name" type="text" placeholder="e.g. Week 3 validation">
+    <p><label for="version-note">Note (optional)</label>
+        <textarea id="version-note" rows="3"></textarea>
+    <div class="dialog-actions">
+        <button id="name-version-cancel" type="button">Cancel</button>
+        <button id="name-version-save" type="button" class="btn-filled">Save</button>
+    </div>
+</dialog>
+
+<dialog id="settings-modal">
+    <h1>Settings</h1>
+    <h2>Account</h2>
+    <p id="settings-account">Not signed in</p>
+    <p><button id="settings-signout" type="button">Sign out</button>
+    <h2>Display</h2>
+    <p><label><input id="pref-highlight-contributors" type="checkbox">Highlight sections by top contributor</label>
+    <h2>Version history</h2>
+    <p><label><input id="pref-flash-changes" type="checkbox" checked>Flash sections that change during playback</label>
+    <p><label for="pref-playback-speed">Playback speed</label>
+        <select id="pref-playback-speed">
+            <option value="1">1×</option>
+            <option value="2">2×</option>
+            <option value="5">5×</option>
+        </select>
+    <h2>Diagnostics &amp; Troubleshooting</h2>
+    <p><button id="settings-diagnostics" type="button">View diagnostics &amp; error logs</button></p>
+    <div class="dialog-actions">
+        <button id="settings-close" type="button">Done</button>
+    </div>
+</dialog>
+
+<dialog id="diagnostics-modal" aria-labelledby="diagnostics-title">
+    <div class="focus-bar">
+        <h1 id="diagnostics-title">Diagnostics &amp; Error Logs</h1>
+    </div>
+    <div class="diagnostics-content">
+        <p class="canvas-list-note">System health, connection state, and captured error telemetry. Sensitive document text is redacted.</p>
+        <pre id="diagnostics-text" class="diagnostics-pre" tabindex="0"></pre>
+    </div>
+    <div class="dialog-actions">
+        <button id="diagnostics-clear" type="button">Clear logs</button>
+        <button id="diagnostics-copy" type="button" class="btn-filled">Copy diagnostics</button>
+        <button id="diagnostics-close" type="button">Close</button>
+    </div>
+</dialog>
+
+<dialog id="metrics-modal">
+    <h1>Contributors</h1>
+    <div id="metrics-bar" class="metrics-bar" role="img" aria-label="Contribution breakdown"></div>
+    <ol id="metrics-leaderboard"></ol>
+    <button id="metrics-close">Close</button>
+</dialog>
+
+<aside id="history-dock" class="history-dock" hidden aria-label="Version history">
+    <div class="history-header">
+        <h2>Version history</h2>
+        <button id="history-exit" type="button" class="icon-btn" title="Close version history" aria-label="Close version history">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+    </div>
+    <div class="history-controls">
+        <button id="history-play" type="button" class="icon-btn" title="Play from the first version" aria-label="Play">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M7 5l12 7-12 7V5z" fill="currentColor"/></svg>
+        </button>
+        <button id="history-pause" type="button" class="icon-btn" title="Pause" aria-label="Pause" hidden>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg>
+        </button>
+        <span id="history-status" class="history-status"></span>
+    </div>
+    <ol id="history-list" class="history-list"></ol>
+    <div id="history-selected-actions" class="history-selected-actions" hidden>
+        <button id="history-restore" type="button" class="btn-filled">Restore this version</button>
+    </div>
+</aside>
+<div id="toast-container" class="toast-container" aria-live="assertive" role="region" aria-label="Notifications"></div>
+</body>

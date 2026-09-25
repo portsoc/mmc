@@ -1,0 +1,74 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isCanvasOwner(canvasData) {
+      return isAuthenticated() && canvasData.ownerId == request.auth.uid;
+    }
+
+    function isCanvasEditor(canvasData) {
+      return isAuthenticated() && (
+        canvasData.roles[request.auth.uid] in ['owner', 'editor']
+      );
+    }
+
+    function isCanvasViewer(canvasData) {
+      return isAuthenticated() && (
+        canvasData.roles[request.auth.uid] in ['owner', 'editor', 'viewer']
+      );
+    }
+
+    function inBin(canvasData) {
+      return canvasData.get('binnedAt', null) != null;
+    }
+
+    // Only the owner may move a canvas into or out of the bin, or change who
+    // owns it or can open it.
+    function changesOwnerOnlyFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasAny(['ownerId', 'roles', 'binnedAt']);
+    }
+
+    match /users/{uid} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == uid;
+    }
+
+    match /canvases/{canvasId} {
+      // A binned canvas stays readable by its collaborators, but its public
+      // link stops working and only the owner can change it.
+      allow read: if isCanvasViewer(resource.data)
+                  || (resource.data.isPublicReadOnlyEnabled == true && !inBin(resource.data));
+      allow create: if isAuthenticated();
+      allow update: if isCanvasOwner(resource.data)
+                    || (isCanvasEditor(resource.data) && !inBin(resource.data) && !changesOwnerOnlyFields());
+      // Deleting for good only happens from the bin (functions/canvases.js).
+      allow delete: if isCanvasOwner(resource.data) && inBin(resource.data);
+
+      match /versions/{versionId} {
+        allow read: if isCanvasViewer(get(/databases/$(database)/documents/canvases/$(canvasId)).data)
+                    || (get(/databases/$(database)/documents/canvases/$(canvasId)).data.isPublicReadOnlyEnabled == true
+                        && !inBin(get(/databases/$(database)/documents/canvases/$(canvasId)).data));
+        allow create: if isCanvasEditor(get(/databases/$(database)/documents/canvases/$(canvasId)).data);
+      }
+
+      match /invites/{inviteId} {
+        allow read, create, update: if isCanvasOwner(get(/databases/$(database)/documents/canvases/$(canvasId)).data);
+      }
+
+      match /metrics/{docId} {
+        allow read: if isCanvasViewer(get(/databases/$(database)/documents/canvases/$(canvasId)).data);
+        allow write: if isCanvasEditor(get(/databases/$(database)/documents/canvases/$(canvasId)).data);
+      }
+    }
+
+    match /public_tokens/{token} {
+      allow read: if true;
+      allow write: if false; // only written by Cloud Functions / trusted server code
+    }
+  }
+}
