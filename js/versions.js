@@ -16,7 +16,7 @@ import {
 import { FIELD_IDS, getCanvas } from './canvas-data.js';
 import { isOwner } from './roles.js';
 import { firstName } from './auth.js';
-import { ensureBullets } from './ragged-links.js';
+import { ensureBullets } from './bullets.js';
 import { normalizeCanvas, normalizeSection } from './item-migration.js';
 
 function todayKey() {

@@ -3,7 +3,7 @@
 // daily), oldest first, and always finishes on the live canvas.
 import { listVersions } from './versions.js';
 import { FIELD_IDS } from './canvas-data.js';
-import { ensureBullets } from './ragged-links.js';
+import { ensureBullets } from './bullets.js';
 
 const SPEED_MS = { 1: 1200, 2: 600, 5: 250 };
 
