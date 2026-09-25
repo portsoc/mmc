@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { describe, it, beforeEach } from 'node:test';
+import { describe, it, beforeEach, afterEach } from 'node:test';
 import { SyncFeedbackManager, ToastManager } from '../../js/feedback.js';
 
 describe('SyncFeedbackManager — Real-time Sync Status', () => {
@@ -150,6 +150,10 @@ describe('ToastManager — Accessible Notifications', () => {
       getElementById: (id) => (id === 'toast-container' ? mockContainer : null)
     };
     toastManager = new ToastManager(mockContainer);
+  });
+
+  afterEach(() => {
+    delete globalThis.document;
   });
 
   it('renders an accessible error toast with message', () => {
