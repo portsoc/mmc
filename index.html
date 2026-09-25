@@ -152,14 +152,20 @@
     <p><button id="share-copy-link" type="button">Copy Link</button>
     <p><label><input id="share-public-toggle" type="checkbox">Allow anyone with this link to view</label>
     <h2>Invite a collaborator</h2>
-    <p><label for="invite-email">Email</label>
-        <input id="invite-email" type="email" placeholder="student@port.ac.uk">
+    <p class="share-note">Creates a one-time link for you to send. Whoever opens it first and signs in joins this canvas. It expires after 30 days.
+    <p><label for="invite-email">For</label>
+        <input id="invite-email" type="text" placeholder="who it's for (a note to yourself)">
     <p><label for="invite-role">Role</label>
         <select id="invite-role">
             <option value="editor">Editor</option>
             <option value="viewer">Viewer</option>
         </select>
-    <p><button id="invite-send" type="button">Send Invite</button>
+    <p><button id="invite-send" type="button">Create invite link</button>
+    <div id="invite-result" hidden>
+        <p><label for="invite-url">Invite link</label>
+            <input id="invite-url" type="text" readonly>
+        <p><button id="invite-copy" type="button">Copy invite link</button>
+    </div>
     <ul id="collaborator-list"></ul>
     <button id="share-close">Close</button>
 </dialog>

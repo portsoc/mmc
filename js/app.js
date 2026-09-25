@@ -148,7 +148,7 @@ async function renderCollaboratorList() {
   for (const invite of invites.filter((i) => i.status === 'pending')) {
     const item = document.createElement('li');
     item.className = 'invite-pending';
-    item.textContent = `${invite.email} — ${invite.role} (pending)`;
+    item.textContent = `${invite.email || 'Invite link'} — ${invite.role} (not used yet)`;
     list.appendChild(item);
   }
 }
@@ -301,6 +301,7 @@ function wireShareModal() {
     const canvas = await getCanvas(state.canvasId);
     document.getElementById('share-readonly-url').value = readOnlyUrlFor(canvas.readOnlyToken);
     document.getElementById('share-public-toggle').checked = !!canvas.isPublicReadOnlyEnabled;
+    document.getElementById('invite-result').hidden = true;
     await renderCollaboratorList();
     modal.showModal();
   });
@@ -316,11 +317,17 @@ function wireShareModal() {
   document.getElementById('invite-send')?.addEventListener('click', async () => {
     const email = document.getElementById('invite-email').value.trim();
     const role = document.getElementById('invite-role').value;
-    if (!email || !state.canvasId) return;
+    if (!state.canvasId) return;
     const inviteToken = await createInvite(state.canvasId, currentUser.value.uid, email, role);
     document.getElementById('invite-email').value = '';
+    document.getElementById('invite-url').value = inviteUrlFor(state.canvasId, inviteToken);
+    document.getElementById('invite-result').hidden = false;
     await renderCollaboratorList();
-    console.info('[app] Invite link (send this to the invitee):', inviteUrlFor(state.canvasId, inviteToken));
+  });
+  document.getElementById('invite-copy')?.addEventListener('click', () => {
+    const input = document.getElementById('invite-url');
+    input.select();
+    navigator.clipboard?.writeText(input.value);
   });
   document.getElementById('share-close')?.addEventListener('click', () => modal.close());
 }
