@@ -5,7 +5,7 @@
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 
-const FIELD_IDS = ['mmd', 'by', 'kp', 'ka', 'vp', 'bs', 'be', 'kr', 'de', 'mb', 'if'];
+const FIELD_IDS = ['title', 'by', 'kp', 'ka', 'vp', 'bs', 'be', 'kr', 'de', 'mb', 'if'];
 
 function wordCount(fields) {
   return Object.values(fields).reduce(

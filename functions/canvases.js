@@ -7,7 +7,7 @@ const { getDatabase } = require('firebase-admin/database');
 const { randomUUID } = require('crypto');
 const { syncAccess } = require('./access');
 
-const FIELD_IDS = ['mmd', 'by', 'kp', 'ka', 'vp', 'bs', 'be', 'kr', 'de', 'mb', 'if'];
+const FIELD_IDS = ['title', 'by', 'kp', 'ka', 'vp', 'bs', 'be', 'kr', 'de', 'mb', 'if'];
 
 exports.createCanvas = onCall(async (request) => {
   const uid = request.auth?.uid;

@@ -1,10 +1,11 @@
 // Cloud Function for remote client error reporting to Google Cloud Logging.
-const { onCall } = require('firebase-functions/v2/https');
+const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { logger } = require('firebase-functions');
 
 exports.reportClientError = onCall({ cors: true }, async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Sign in required.');
   const data = request.data || {};
-  const uid = request.auth?.uid || data.uid || 'anonymous';
+  const uid = request.auth.uid;
 
   // Sanitize and constrain size
   const type = String(data.type || 'unknown').slice(0, 50);
