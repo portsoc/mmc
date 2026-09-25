@@ -84,3 +84,27 @@ test('right-clicking a bullet opens the style popup, and a chosen colour survive
   await page.reload();
   await expect(page.locator('#ekp li').first()).toHaveAttribute('data-color', colour);
 });
+
+test('dragging a bullet onto another line links them, and the link survives reload', async ({ page }) => {
+  await openNewCanvas(page, testEmail('link'));
+  await page.locator('#ekp').click();
+  await page.keyboard.type('partner');
+  await page.locator('#eka').click();
+  await page.keyboard.type('activity');
+  const source = page.locator('#ekp li').first();
+  const target = page.locator('#eka li').first();
+  const s = await source.boundingBox();
+  const t = await target.boundingBox();
+  await page.mouse.move(s.x + 4, s.y + s.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(s.x + 30, s.y + s.height / 2, { steps: 5 });
+  await page.mouse.move(t.x + t.width / 2, t.y + t.height / 2, { steps: 10 });
+  await page.mouse.up();
+  const assoc = await source.getAttribute('data-assoc');
+  expect(assoc).toBeTruthy();
+  await expect(target).toHaveAttribute('data-assoc', assoc);
+  await page.waitForTimeout(3000); // let the debounced save flush
+  await page.reload();
+  await expect(page.locator('#ekp li').first()).toHaveAttribute('data-assoc', assoc);
+  await expect(page.locator('#eka li').first()).toHaveAttribute('data-assoc', assoc);
+});
