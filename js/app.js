@@ -732,7 +732,18 @@ function doneLoading() {
   root.removeAttribute('aria-busy');
 }
 
+// Load-stage timings, printed once as `[load] …` so slow stages are visible.
+const loadMarks = [];
+function markLoad(stage) {
+  loadMarks.push([stage, Math.round(performance.now())]);
+}
+function reportLoad() {
+  let prev = 0;
+  console.info('[load] ' + loadMarks.map(([stage, t]) => { const d = t - prev; prev = t; return `${stage} +${d}ms`; }).join(' · ') + ` = ${prev}ms`);
+}
+
 async function init() {
+  markLoad('script');
   initPanelFocus();
 
   // Initialize diagnostics and user feedback
@@ -781,6 +792,7 @@ async function init() {
   if (window.location.pathname === '/canvases') showCanvasListSkeleton();
   try {
     await initAuth();
+    markLoad('auth');
   } catch (err) {
     console.warn('[app] Firebase auth unavailable, staying in local-only mode:', err.message);
     initRaggedLinks(elementsById());
@@ -835,7 +847,9 @@ async function init() {
   // Signed-out visitors on a public link have no canvases of their own.
   for (const el of document.querySelectorAll('[data-needs-account]')) el.hidden = !currentUser.value;
 
+  markLoad('route');
   const canvas = await getCanvas(state.canvasId);
+  markLoad('firestore');
   if (!canvas) {
     console.warn('[app] Canvas not found for id', state.canvasId);
     doneLoading();
@@ -889,8 +903,10 @@ async function init() {
     }
   }
 
+  markLoad('render');
   if (state.readOnly) {
     doneLoading();
+    reportLoad();
   } else {
     try {
       state.collab = await bindCollaborativeFields(state.canvasId, els, normalizedCanvas.fields, normalizedCanvas.items, (fieldId, remoteValue) => {
@@ -949,7 +965,9 @@ async function init() {
     } catch (err) {
       console.warn('[app] Collaborative binding error, continuing with local editing:', err);
     } finally {
+      markLoad('live-sync');
       doneLoading();
+      reportLoad();
     }
 
     for (const fieldId of ['title', 'by']) {
