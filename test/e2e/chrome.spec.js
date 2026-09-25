@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { openNewCanvas, testEmail } from './helpers.js';
+import { openNewCanvas, signIn, testEmail, waitLoaded } from './helpers.js';
 
 test('a section opens in the focus modal, is editable there, and returns on close', async ({ page }) => {
   await openNewCanvas(page, testEmail('focus'));
@@ -127,4 +127,13 @@ test('dragging a bullet onto another line links them, and the link survives relo
   await page.reload();
   await expect(page.locator('#ekp li').first()).toHaveAttribute('data-assoc', assoc);
   await expect(page.locator('#eka li').first()).toHaveAttribute('data-assoc', assoc);
+});
+
+test('a canvas that cannot be loaded stops loading and says so', async ({ page }) => {
+  await signIn(page, testEmail('missing'));
+  await page.goto('/canvas/doesNotExist123');
+  await waitLoaded(page);
+  const toast = page.locator('.toast-error');
+  await expect(toast).toContainText(/access to this canvas|doesn't exist/);
+  await expect(toast.getByRole('button', { name: 'Your canvases' })).toBeVisible();
 });

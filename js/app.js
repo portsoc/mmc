@@ -150,6 +150,16 @@ function doneLoading() {
   root.removeAttribute('aria-busy');
 }
 
+/** Stop the loading shimmer, lock the page and say what went wrong. */
+function showLoadFailure(message) {
+  doneLoading();
+  for (const el of Object.values(elementsById())) el?.setAttribute('contenteditable', 'false');
+  toastManager.error(message, {
+    duration: 0,
+    action: { label: 'Your canvases', onClick: () => { window.location.href = '/canvases'; } }
+  });
+}
+
 // Load-stage timings, printed once as `[load] …` so slow stages are visible.
 const loadMarks = [];
 function markLoad(stage) {
@@ -379,11 +389,19 @@ async function init() {
   if (!(await routeToCanvas())) return;
 
   markLoad('route');
-  const canvas = await getCanvas(state.canvasId);
+  let canvas;
+  try {
+    canvas = await getCanvas(state.canvasId);
+  } catch (err) {
+    showLoadFailure(err?.code === 'permission-denied'
+      ? "You don't have access to this canvas. Ask its owner for an invite, or check you're signed in with the right account."
+      : "Couldn't load this canvas. Check your connection and try again.");
+    return;
+  }
   markLoad('firestore');
   if (!canvas) {
     console.warn('[app] Canvas not found for id', state.canvasId);
-    doneLoading();
+    showLoadFailure("This canvas doesn't exist. It may have been deleted, or the link may be wrong.");
     return;
   }
 
